@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getAppSession } from "@/lib/auth";
+import { requireActiveWorkspace } from "@/lib/workspace-context";
 import { listPlots } from "@/lib/services/plots";
 import { PlotsManager } from "@/components/plots/plots-manager";
 
@@ -9,12 +8,8 @@ export const metadata: Metadata = {
 };
 
 export default async function PlotsPage() {
-  const session = await getAppSession();
-  if (!session) redirect("/login");
-  const ws = session.memberships[0]?.workspace;
-  if (!ws) redirect("/login");
-
-  const plots = await listPlots(ws.id);
+  const ctx = await requireActiveWorkspace();
+  const plots = await listPlots(ctx.workspaceId);
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,7 +19,7 @@ export default async function PlotsPage() {
           Each plot is a product, team, or stream. Sprouts live inside a plot.
         </p>
       </div>
-      <PlotsManager workspaceId={ws.id} initialPlots={plots} />
+      <PlotsManager workspaceId={ctx.workspaceId} initialPlots={plots} />
     </div>
   );
 }

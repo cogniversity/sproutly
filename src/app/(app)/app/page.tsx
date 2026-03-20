@@ -1,23 +1,22 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppSession } from "@/lib/auth";
+import { requireActiveWorkspace } from "@/lib/workspace-context";
 import { listPlots } from "@/lib/services/plots";
 
 export default async function AppHomePage() {
-  const session = await getAppSession();
-  if (!session) redirect("/login");
-  const ws = session.memberships[0]?.workspace;
-  const plotCount = ws ? (await listPlots(ws.id)).length : 0;
+  const ctx = await requireActiveWorkspace();
+  const plotCount = (await listPlots(ctx.workspaceId)).length;
 
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Hi, {session.user.name}
+          Hi, {ctx.session.user.name}
         </h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          You are in <strong>{ws?.name ?? "your workspace"}</strong>. Organize work
-          into Plots, then capture ideas and delivery as Sprouts.
+          You are in <strong>{ctx.workspace.name}</strong>. Organize work into Plots,
+          then capture ideas and delivery as Sprouts. Switch workspace from the header
+          or open <a className="text-emerald-700 underline dark:text-emerald-400" href="/app/workspaces">Workspaces</a>{" "}
+          to create one or invite teammates.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">

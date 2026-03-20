@@ -4,6 +4,7 @@ import type { Sprout, SproutStatus, User } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AiSuggestButton } from "@/components/ai/ai-suggest-button";
+import { toDateInputLocal } from "@/lib/date-parse";
 import { formatPlanningLine } from "@/lib/timeline";
 
 export type SproutRow = Sprout & {
@@ -93,7 +94,7 @@ export function PlotSproutsManager({
 
   async function elaborate(sproutId: string, create: boolean) {
     setAiBusy(sproutId);
-    setAiPreview(null);
+    if (!create) setAiPreview(null);
     try {
       const res = await fetch(`/api/sprouts/${sproutId}/elaborate`, {
         method: "POST",
@@ -173,7 +174,7 @@ export function PlotSproutsManager({
             type="date"
             value={newTarget}
             onChange={(e) => setNewTarget(e.target.value)}
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
+            className="min-h-[2.5rem] min-w-[10rem] rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
           />
         </div>
         <button
@@ -210,10 +211,9 @@ export function PlotSproutsManager({
                   key={`${s.id}-${s.updatedAt.toString()}`}
                   s={s}
                   aiBusy={aiBusy}
-                  aiPreview={aiPreview}
                   onPatch={patchSprout}
                   onRemove={removeSprout}
-                  onElaborate={elaborate}
+                  onSuggestTasks={(id) => void elaborate(id, false)}
                 />
               ))
             )}
@@ -225,6 +225,9 @@ export function PlotSproutsManager({
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950/30">
           <p className="font-medium text-emerald-900 dark:text-emerald-200">
             Suggested breakdown
+          </p>
+          <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+            Review below. Accept to add these as sub-sprouts, or dismiss to discard.
           </p>
           <ol className="mt-2 list-decimal space-y-1 pl-5">
             {aiPreview.suggestions.map((x, i) => (
@@ -238,6 +241,24 @@ export function PlotSproutsManager({
               </li>
             ))}
           </ol>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={aiBusy !== null}
+              onClick={() => void elaborate(aiPreview.sproutId, true)}
+              className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {aiBusy ? "Working…" : "Accept — create sub-sprouts"}
+            </button>
+            <button
+              type="button"
+              disabled={aiBusy !== null}
+              onClick={() => setAiPreview(null)}
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-600"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       ) : null}
     </div>
@@ -247,43 +268,46 @@ export function PlotSproutsManager({
 function SproutRowFields({
   s,
   aiBusy,
-  aiPreview,
   onPatch,
   onRemove,
-  onElaborate,
+  onSuggestTasks,
 }: {
   s: SproutRow;
   aiBusy: string | null;
-  aiPreview: { sproutId: string; suggestions: unknown[] } | null;
   onPatch: (
     id: string,
     p: Record<string, string | SproutStatus | null | undefined>,
   ) => void | Promise<void>;
   onRemove: (id: string) => void;
-  onElaborate: (id: string, create: boolean) => void;
+  onSuggestTasks: (id: string) => void;
 }) {
-  const dateStr = s.targetCompletionAt
-    ? new Date(s.targetCompletionAt).toISOString().slice(0, 10)
-    : "";
+  const [rowTitle, setRowTitle] = useState(s.title);
+  const [rowDesc, setRowDesc] = useState(s.description ?? "");
+  const [tl, setTl] = useState(s.timelineLabel ?? "");
+  const [dateVal, setDateVal] = useState(() =>
+    toDateInputLocal(s.targetCompletionAt),
+  );
 
   return (
     <tr className="border-b border-zinc-100 dark:border-zinc-800">
       <td className="px-3 py-2 align-top font-medium">
         {s.parentSproutId ? <span className="text-zinc-400">↳ </span> : null}
         <input
-          defaultValue={s.title}
-          onBlur={(e) => {
-            const v = e.target.value.trim();
+          value={rowTitle}
+          onChange={(e) => setRowTitle(e.target.value)}
+          onBlur={() => {
+            const v = rowTitle.trim();
             if (v && v !== s.title) void onPatch(s.id, { title: v });
           }}
           className="w-full rounded border border-transparent px-1 py-0.5 font-medium hover:border-zinc-200 dark:hover:border-zinc-700"
         />
         <textarea
-          defaultValue={s.description ?? ""}
+          value={rowDesc}
+          onChange={(e) => setRowDesc(e.target.value)}
           placeholder="Description"
           rows={2}
-          onBlur={(e) => {
-            const v = e.target.value.trim();
+          onBlur={() => {
+            const v = rowDesc.trim();
             const next = v || null;
             if (next !== (s.description ?? null)) void onPatch(s.id, { description: next });
           }}
@@ -307,24 +331,31 @@ function SproutRowFields({
       </td>
       <td className="px-3 py-2 align-top">
         <input
-          defaultValue={s.timelineLabel ?? ""}
+          value={tl}
+          onChange={(e) => setTl(e.target.value)}
           placeholder="Q3'27"
-          onBlur={(e) =>
-            void onPatch(s.id, {
-              timelineLabel: e.target.value.trim() || null,
-            })
-          }
+          onBlur={() => {
+            const v = tl.trim();
+            const next = v || null;
+            if (next !== (s.timelineLabel ?? null)) {
+              void onPatch(s.id, { timelineLabel: next });
+            }
+          }}
           className="mb-1 w-full rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-600"
         />
         <input
           type="date"
-          defaultValue={dateStr}
-          onBlur={(e) =>
-            void onPatch(s.id, {
-              targetCompletionAt: e.target.value.trim() || null,
-            })
-          }
-          className="w-full rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-600"
+          value={dateVal}
+          onChange={(e) => setDateVal(e.target.value)}
+          onBlur={() => {
+            const server = toDateInputLocal(s.targetCompletionAt);
+            const next = dateVal.trim() || null;
+            const normalized = next || null;
+            if (normalized !== (server || null)) {
+              void onPatch(s.id, { targetCompletionAt: normalized });
+            }
+          }}
+          className="min-h-[2rem] w-full rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-600"
         />
       </td>
       <td className="px-3 py-2 align-top text-xs text-zinc-500">
@@ -337,26 +368,14 @@ function SproutRowFields({
         {s.owner?.name ?? "—"}
       </td>
       <td className="px-3 py-2 align-top">
-        <div className="flex flex-col gap-1">
-          <button
-            type="button"
-            disabled={aiBusy === s.id}
-            onClick={() => void onElaborate(s.id, false)}
-            className="text-left text-xs text-emerald-700 underline disabled:opacity-50 dark:text-emerald-400"
-          >
-            {aiBusy === s.id ? "…" : "Suggest tasks"}
-          </button>
-          {aiPreview?.sproutId === s.id ? (
-            <button
-              type="button"
-              disabled={aiBusy === s.id}
-              onClick={() => void onElaborate(s.id, true)}
-              className="text-left text-xs font-medium text-emerald-800 dark:text-emerald-300"
-            >
-              Create sub-sprouts
-            </button>
-          ) : null}
-        </div>
+        <button
+          type="button"
+          disabled={aiBusy === s.id}
+          onClick={() => onSuggestTasks(s.id)}
+          className="text-left text-xs text-emerald-700 underline disabled:opacity-50 dark:text-emerald-400"
+        >
+          {aiBusy === s.id ? "…" : "Suggest tasks"}
+        </button>
       </td>
       <td className="px-3 py-2 align-top text-right">
         <button

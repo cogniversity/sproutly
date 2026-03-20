@@ -5,7 +5,7 @@ import { getAppSession } from "@/lib/auth";
 import { canReadWorkspace } from "@/lib/authz";
 import * as plots from "@/lib/services/plots";
 import * as sprouts from "@/lib/services/sprouts";
-import { PlotEditForm } from "@/components/plots/plot-edit-form";
+import { PlotDetailsSection } from "@/components/plots/plot-details-section";
 import { PlotSproutsManager } from "@/components/plots/plot-sprouts-manager";
 
 type Props = { params: Promise<{ plotId: string }> };
@@ -44,7 +44,7 @@ export default async function PlotDetailPage({ params }: Props) {
           {plot.name}
         </h1>
       </div>
-      <PlotEditForm workspaceId={plot.workspaceId} plot={plot} />
+      <PlotDetailsSection workspaceId={plot.workspaceId} plot={plot} />
       <PlotSproutsManager
         plotId={plotId}
         workspaceId={plot.workspaceId}

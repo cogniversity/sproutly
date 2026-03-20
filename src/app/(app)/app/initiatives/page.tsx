@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getAppSession } from "@/lib/auth";
+import { requireActiveWorkspace } from "@/lib/workspace-context";
 import { InitiativesBoard } from "@/components/initiatives/initiatives-board";
 import * as initiatives from "@/lib/services/initiatives";
 
@@ -9,12 +8,8 @@ export const metadata: Metadata = {
 };
 
 export default async function InitiativesPage() {
-  const session = await getAppSession();
-  if (!session) redirect("/login");
-  const ws = session.memberships[0]?.workspace;
-  if (!ws) redirect("/login");
-
-  const list = await initiatives.listInitiatives(ws.id);
+  const ctx = await requireActiveWorkspace();
+  const list = await initiatives.listInitiatives(ctx.workspaceId);
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,7 +19,7 @@ export default async function InitiativesPage() {
           Programs that span multiple plots (demos, migrations, coordinated work).
         </p>
       </div>
-      <InitiativesBoard workspaceId={ws.id} initial={list} />
+      <InitiativesBoard workspaceId={ctx.workspaceId} initial={list} />
     </div>
   );
 }
