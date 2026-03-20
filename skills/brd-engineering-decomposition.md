@@ -4,6 +4,16 @@ Use this skill when the user provides a **BRD**, **PRD**, **product spec**, or *
 
 **Goal**: A structure engineers can pick up **without inventing scope**—clear ownership boundaries, minimal overlap, realistic sequencing.
 
+## Pipeline position
+
+| | |
+|--|--|
+| **Runs after** | [`product-brd-generation.md`](product-brd-generation.md) (or equivalent BRD / spec). |
+| **Feeds** | [`decomposition-to-system-architecture.md`](decomposition-to-system-architecture.md). |
+| **Primary output** | **Features → Epics → Tasks** with types, **S/M/L** effort, dependencies, MVP boundaries. |
+
+**If architecture or schema already exists** (e.g., brownfield or prior agent run): **revise tasks to match** those artifacts—do **not** invent a parallel breakdown that contradicts endpoints, tables, or module boundaries. Prefer **diff-style** task updates (what changed vs legacy).
+
 ---
 
 ## Principles
@@ -12,7 +22,7 @@ Use this skill when the user provides a **BRD**, **PRD**, **product spec**, or *
 - **Non-overlapping boundaries**: Each task belongs to **one** epic; epics don’t duplicate the same slice of work; features don’t smear into each other.
 - **Logical grouping**: Epics cluster by **coherent functional area** or **vertical slice boundary** (see below)—not random file touches.
 - **Engineer-ready tasks**: A senior engineer should recognize **what to build**, **where it lives**, and **how to verify**—without another decomposition pass.
-- **Balanced granularity**: Aim for **0.5–3 day** tasks for a typical mid-level engineer (rough guide—not a mandate). Split only when parallelization or risk demands it.
+- **Balanced granularity**: Each task should be **one cohesive implementation unit** (typically **S** or **M** effort—see task table below); split when parallelization, risk, or review boundaries demand it. **Calendar duration is optional** when agents own implementation; use **effort + dependency** as the primary guide.
 - **Bullets over essays**: Short descriptions; link intent back to BRD acceptance criteria when useful.
 
 ---
@@ -39,7 +49,7 @@ Pick a decomposition style based on risk and team shape:
 
 - **Vertical slice** (preferred for product MVPs): Epic = **user journey segment**; tasks cut across FE/BE/DB as needed but stay **small** and ordered.
 - **Layered** (sometimes for platform-heavy work): Epics by **API**, **data**, **integrations**—only when the BRD is infrastructure-first; still avoid tasks that are “do all models.”
-- **Spikes / research**: Allowed as **tasks** with **Type** = label as **spike** in description or use `integration` / `backend` with explicit **time-box** in description (e.g., “Spike: 1 day max, doc decision in ADR comment”).
+- **Spikes / research**: Allowed as **tasks**—tag **spike** in title/description with a **bounded scope** and **exit artifact** (e.g., decision doc, ADR comment, prototype branch)—not open-ended research.
 
 Reflect **ordering**: call out **blocked-by** dependencies between tasks when not obvious.
 
@@ -67,14 +77,14 @@ Ask **targeted** questions before locking tasks (or produce **v1 with Assumption
 
 ---
 
-## Adaptation: timeline (MVP vs full build)
+## Adaptation: scope depth (MVP vs full build)
 
 | Mode | Behavior |
 |------|----------|
 | **MVP** | Ruthless **scope**: fewer features; **defer** epics with explicit **Out of MVP** section; prefer **manual** or **thin** integrations where BRD allows; mark **Nice-to-have** tasks as **Low** priority or exclude. |
 | **Full build** | Cover **NFRs** (observability, hardening, migration paths); add **polish** epics only when BRD demands; keep tasks concrete (“Add retries + DLQ for job X” not “Improve reliability”). |
 
-State at top: `**Decomposition mode:** MVP | Full | Hybrid` and `**Assumed team size:** …` if unknown, note **TBD**.
+State at top: `**Decomposition mode:** MVP | Full | Hybrid` and `**Assumed team size:** …` if unknown, note **TBD**. **Timeline** is optional when downstream work is agent-driven; **scope boundaries** are not.
 
 ---
 
@@ -107,7 +117,7 @@ For **each task**:
 | **Description** | **What** to implement, **key files/areas** if known, **how to verify** (tests, checklist, screenshot). |
 | **Type** | One of: `frontend`, `backend`, `database`, `integration` (use **closest primary**; mention secondary in description if split is artificial). |
 | **Priority** | `high`, `medium`, `low` (aligned to MVP critical path). |
-| **Estimated effort** | `S`, `M`, `L` (same engineer, focused time): **S** ≈ under half a day, **M** ≈ 0.5–2d, **L** ≈ 2–4d; beyond **L** → **split** or mark as epic-level with subtasks. |
+| **Estimated effort** | `S`, `M`, `L`: **S** = small single focused change; **M** = multi-file / moderate complexity; **L** = large cohesive slice—**split** if it spans unrelated concerns or blocks parallel work. (Aligns with [`architecture-to-execution-plan.md`](architecture-to-execution-plan.md).) |
 | **Dependencies** | Other **task titles** or **external** deps (API keys, design, legal); `none` if truly independent. |
 
 **Effort calibration**: If stack/team unknown, state assumptions in a one-line **Effort note** under the feature.

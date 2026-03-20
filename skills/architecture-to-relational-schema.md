@@ -4,6 +4,14 @@ Use this skill when the user provides **system architecture**, **product decompo
 
 **Goal**: A data model engineers can implement **without guesswork**: explicit entities, keys, FKs, integrity rules, and indexes tied to **real query patterns**—aligned to APIs and architecture (no orphan tables, no silent feature drops).
 
+## Pipeline position
+
+| | |
+|--|--|
+| **Runs after** | [`decomposition-to-system-architecture.md`](decomposition-to-system-architecture.md) (+ decomposition for context). |
+| **Feeds** | [`architecture-to-execution-plan.md`](architecture-to-execution-plan.md) and [`structured-task-to-production-code.md`](structured-task-to-production-code.md) (per task). |
+| **Primary output** | Tables, relationships, indexes, integrity rules; optional **Prisma** / **SQL DDL**. |
+
 ---
 
 ## Principles
