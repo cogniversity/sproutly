@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum SproutStatus {
+  BACKLOG
+  IN_PROGRESS
+  PAUSED
+  DEPRIORITIZED
+  BLOCKED
+  DONE
+}
+
+enum Horizon {
+  NONE
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
+}
+
+enum LlmProvider {
+  OPENAI
+  ANTHROPIC
+  GOOGLE
+}
+
+enum EmailTemplateKind {
+  INVITE
+  DIGEST
+  GENERIC
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  sessions     Session[]
+  memberships  Membership[]
+  ownedSprouts Sprout[]     @relation("SproutOwner")
+  initiativesAsDri Initiative[] @relation("InitiativeDri")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Workspace {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+  plots       Plot[]
+  initiatives Initiative[]
+  harvests    Harvest[]
+  aiSettings  WorkspaceAiSettings?
+  emailTemplates EmailTemplate[]
+}
+
+model Membership {
+  id          String         @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        MembershipRole
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([userId, workspaceId])
+}
+
+model Plot {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sprouts     Sprout[]
+  initiativePlots InitiativePlot[]
+
+  @@index([workspaceId])
+}
+
+model Sprout {
+  id             String       @id @default(cuid())
+  plotId         String
+  plot           Plot         @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  parentSproutId String?
+  parent         Sprout?      @relation("SproutTree", fields: [parentSproutId], references: [id], onDelete: SetNull)
+  children       Sprout[]     @relation("SproutTree")
+  title          String
+  description    String?
+  status         SproutStatus @default(BACKLOG)
+  horizon        Horizon      @default(NONE)
+  ownerUserId    String?
+  owner          User?        @relation("SproutOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  initiativeSprouts InitiativeSprout[]
+  harvestSprouts HarvestSprout[]
+
+  @@index([plotId])
+  @@index([ownerUserId])
+  @@index([parentSproutId])
+}
+
+model Initiative {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  driUserId   String?
+  dri         User?     @relation("InitiativeDri", fields: [driUserId], references: [id], onDelete: SetNull)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  plots       InitiativePlot[]
+  sprouts     InitiativeSprout[]
+
+  @@index([workspaceId])
+}
+
+model InitiativePlot {
+  initiativeId String
+  plotId       String
+  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  plot         Plot       @relation(fields: [plotId], references: [id], onDelete: Cascade)
+
+  @@id([initiativeId, plotId])
+  @@index([plotId])
+}
+
+model InitiativeSprout {
+  initiativeId String
+  sproutId     String
+  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  sprout       Sprout     @relation(fields: [sproutId], references: [id], onDelete: Cascade)
+
+  @@id([initiativeId, sproutId])
+  @@index([sproutId])
+}
+
+model Harvest {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name         String
+  versionLabel String?
+  targetDate   DateTime?
+  shippedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sprouts      HarvestSprout[]
+
+  @@index([workspaceId])
+}
+
+model HarvestSprout {
+  harvestId String
+  sproutId  String
+  harvest   Harvest @relation(fields: [harvestId], references: [id], onDelete: Cascade)
+  sprout    Sprout  @relation(fields: [sproutId], references: [id], onDelete: Cascade)
+
+  @@id([harvestId, sproutId])
+  @@index([sproutId])
+}
+
+model WorkspaceAiSettings {
+  id          String      @id @default(cuid())
+  workspaceId String      @unique
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  enabled     Boolean     @default(false)
+  provider    LlmProvider?
+  /// Server-side only; never returned in full to non-admin clients.
+  apiKey      String?
+  updatedAt   DateTime    @updatedAt
+}
+
+model EmailTemplate {
+  id          String             @id @default(cuid())
+  workspaceId String
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  kind        EmailTemplateKind  @default(GENERIC)
+  name        String
+  subject     String
+  bodyHtml    String             @db.Text
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([workspaceId])
+}
