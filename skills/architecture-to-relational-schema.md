@@ -20,7 +20,7 @@ Use this skill when the user provides **system architecture**, **product decompo
 - **Practical normalization**: Prefer **3NF** for core domain; allow **targeted denormalization** only when justified (read path, audit, reporting)—call out the **tradeoff**.
 - **No over-engineering**: No generic “property bag” tables, no speculative abstractions, no parallel models for the same concept.
 - **Naming**: **`snake_case`** for tables and columns; **singular table names** *or* **plural**—pick **one** convention per document and state it in **Assumptions** (PostgreSQL ecosystem often uses plural `users`, `orders`; Prisma often maps model `User` → table `User` or `users`—**state the mapping** when giving Prisma).
-- **PostgreSQL-first types**: Use PG types (`uuid`, `timestamptz`, `text`, `boolean`, `jsonb` when semistructured data is bounded and queried), appropriate precisions for numerics, `citext` only if case-insensitive email/login is required (note extension).
+- **PostgreSQL-first types**: Use PG types (`uuid`, `timestamptz`, `text`, `boolean`, `jsonb` for truly semistructured payloads (variable shape, not queried by field in hot paths—see indexing section for when GIN applies)), appropriate precisions for numerics, `citext` only if case-insensitive email/login is required (note extension).
 - **API alignment**: Every **resource** or **persistent concept** implied by endpoints should **map** to tables/columns or be explicitly **out of DB** (e.g., ephemeral cache only).
 
 ---
@@ -103,13 +103,14 @@ Prefer PostgreSQL **native enums** *or* `text` + `CHECK` for MVP flexibility—*
 
 - **Avoid** indexing every column; justify each secondary index (write amplification).
 - **Partial indexes** when filtering soft-deleted or status subsets.
-- **`jsonb`**: GIN only when querying inside JSON—otherwise avoid `jsonb`.
+- **`jsonb`**: Use a GIN index only when querying inside the JSON structure (e.g., `payload @> '{"status":"active"}'`). If you never filter by JSON fields, no index needed—but `jsonb` is still fine as a column type for structured payloads.
 
 ### 5. Data integrity and constraints
 
 - **ON DELETE / ON UPDATE** per FK: `RESTRICT`, `CASCADE`, `SET NULL`—pick **per relationship** with rationale (e.g., child rows meaningless without parent → `CASCADE`; optional ref → `SET NULL`).
 - **Uniqueness**: business keys (`email` per tenant), natural composites
 - **Validation assumptions**: what the **DB** enforces vs **app** (e.g., format regex in app, non-null and FK in DB)
+- **Soft delete**: if `deleted_at` is used, add a **partial index** on all high-traffic queries filtering `WHERE deleted_at IS NULL` to avoid scanning deleted rows; also ensure `UNIQUE` constraints are partial (e.g., `CREATE UNIQUE INDEX ... WHERE deleted_at IS NULL`) to allow re-creation of logically deleted records.
 
 ### 6. Query considerations
 
@@ -151,24 +152,26 @@ Bulleted list: every guess about tenancy, IDs, naming, timestamps, money, auth, 
 
 ## Future schema extensions
 
-- **Near-term** (next 1–2 milestones): tables/columns likely to add; how to avoid breaking migrations
-- **Later**: sharding/partitioning, read replicas, event outbox, search index tables
+- **Near-term** (next planned increment): tables/columns likely to add; specifically call out additive-only migrations and any planned backfills.
+- **Later**: sharding/partitioning, read replicas, event outbox, search index tables—only name these if the architecture document explicitly defers them.
 
 ---
 
-## Optional implementation appendix (recommended)
+## Implementation appendix
 
-Provide **either** (or both, if concise):
+Default: provide **B) Prisma schema** for any project using Prisma (check the repo stack). Provide **A) SQL DDL** instead—or in addition—when the project uses raw SQL migrations or a non-Prisma ORM.
 
 ### A) SQL DDL (`CREATE TYPE`, `CREATE TABLE`, indexes, FKs)
 
-- Executable **PostgreSQL** DDL; comments on non-obvious choices
+- Executable **PostgreSQL** DDL; include `CREATE EXTENSION` for any required extensions (e.g., `pgcrypto` for `gen_random_uuid()`, `citext`).
+- Comments on non-obvious choices.
 
 ### B) Prisma schema
 
 - `generator` / `datasource` block placeholders (`provider = "postgresql"`, `url = env("DATABASE_URL")`)
 - `model` definitions with `@id`, `@default`, `@relation`, `enum`, `@@index`, `@@unique`
-- Note **Prisma migration** caveats (enum changes, relation names)
+- After schema changes, the implementation agent must run `prisma migrate dev` (development) or `prisma migrate deploy` (CI/production) and `prisma generate`.
+- Note **Prisma migration** caveats (enum renames require manual steps; relation name changes are breaking).
 
 Keep appendix **consistent** with the narrative sections (same tables, columns, relations).
 
@@ -192,4 +195,5 @@ Keep appendix **consistent** with the narrative sections (same tables, columns, 
 - [ ] **Indexes** tied to listed query patterns
 - [ ] **Features** and **APIs** mapped—no unexplained orphans
 - [ ] **Assumptions** and **tradeoffs** explicit
-- [ ] Optional **DDL or Prisma** matches the design
+- [ ] **Prisma schema** (or SQL DDL) provided and consistent with narrative sections
+- [ ] If soft delete used: partial indexes present and unique constraints are partial

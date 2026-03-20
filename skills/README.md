@@ -92,17 +92,5 @@ After material design decisions:
 ## Drift control
 
 - **Single source of truth per concern**: BRD (why), decomposition (what work), architecture (how pieces talk), schema (persistent truth), plan (order), code (reality).
-- If a later agent **contradicts** an earlier artifact, **stop** and reconcile (or document **Assumptions** + **Open questions**) instead of silently patching.
-
----
-
-## File index
-
-| File | Role |
-|------|------|
-| `product-brd-generation.md` | Product requirements |
-| `brd-engineering-decomposition.md` | Work breakdown |
-| `decomposition-to-system-architecture.md` | Technical design |
-| `architecture-to-relational-schema.md` | Data model |
-| `architecture-to-execution-plan.md` | Sequencing & setup |
-| `structured-task-to-production-code.md` | Implementation |
+- If **any** agent contradicts an earlier artifact, **stop** and reconcile (or document **Assumptions** + **Open questions**) instead of silently patching. This applies at every step—not only architecture.
+- **Upstream errors surfaced late**: If a code or schema agent discovers an inconsistency in an upstream artifact (wrong endpoint shape, missing column, scope gap), surface it explicitly and trace it back to the source document before proceeding.

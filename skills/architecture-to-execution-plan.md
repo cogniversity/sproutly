@@ -117,6 +117,7 @@ Keep depth **reasonable**; note **one** sentence per top-level folder.
 
 ### 4. API implementation plan
 
+- **Source of truth**: Use the **API contract** from the architecture document (OpenAPI fragment or per-route field lists) as the authoritative endpoint spec. Do not invent or re-derive endpoint shapes here.
 - **Ordered list** of endpoints to build (or endpoint groups), **first to last**.
 - **Map** each to **feature / epic** (and related tables).
 - **Dependencies**: required migrations, auth middleware, external client ready, feature flags.
@@ -150,18 +151,19 @@ Keep depth **reasonable**; note **one** sentence per top-level folder.
 
 ## Iterating after initial implementation
 
-- **Weekly rhythm**: Demo → capture gaps → insert **small** tasks into **Enhancements** phase; avoid reopening closed migrations without additive migrations.
-- **Schema changes**: Prefer **forward-only** migrations; document **backfill** tasks if needed.
+- **Per-cycle rhythm**: After each implementation pass, demo → capture gaps → insert **small** tasks into the **Enhancements** phase. Avoid reopening closed migrations; prefer additive migrations instead.
+- **Schema changes**: Prefer **forward-only** migrations; document **backfill** tasks explicitly when needed.
 - **API versioning**: When breaking clients, add **v2** tasks explicitly—don’t retrofit silently.
 - **Traceability**: Optionally tag tasks with `Feature: …` / `Epic: …` for churn tracking.
 
 ---
 
-## Splitting work across engineers
+## Splitting work across agents or engineers
 
-- **After foundation**: Engineer A **vertical** on domain slice (BE+FE+tests); Engineer B on **integration** or **second slice**—only if **contracts** (types/OpenAPI) land first **or** tasks are truly independent.
-- **Avoid**: Two engineers editing same migration chain simultaneously—**serialize** DB ownership or use **branching strategy** with clear merge order.
-- **Handoffs**: Each handoff task lists **consumer** and **deliverable artifact** (published package, schema file, mock server).
+- **After foundation**: One agent/engineer goes **vertical** on domain slice (BE+FE+tests); a second starts on **integration** or **second slice**—only if **contracts** (types/OpenAPI) are committed first **or** tasks are truly independent (no shared files).
+- **Avoid**: Two parallel agents touching the same migration chain simultaneously—this produces merge conflicts on migration files. Assign DB migration ownership to one agent at a time; all others wait for it to complete.
+- **Handoffs**: Each handoff task lists **consumer** and **deliverable artifact** (committed schema file, OpenAPI snippet, published package, mock server).
+- **Agent parallelization rule**: Before launching parallel agents, confirm that the tasks share no files in their output set. Anything touching `schema.prisma`, shared route files, or global config must be **serialized**.
 
 ---
 
