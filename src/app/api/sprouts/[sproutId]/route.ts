@@ -3,6 +3,7 @@ import {
   canEditWorkspace,
   canReadWorkspace,
 } from "@/lib/authz";
+import { optDate } from "@/lib/date-parse";
 import { jsonError } from "@/lib/http";
 import * as sprouts from "@/lib/services/sprouts";
 import { patchSproutBodySchema } from "@/lib/validations/api";
@@ -48,7 +49,13 @@ export async function PATCH(
   const parsed = patchSproutBodySchema.safeParse(body);
   if (!parsed.success) return jsonError("Invalid request", 400);
 
-  const updated = await sprouts.updateSprout(sproutId, parsed.data);
+  const { targetCompletionAt, ...rest } = parsed.data;
+  const updated = await sprouts.updateSprout(sproutId, {
+    ...rest,
+    ...(targetCompletionAt !== undefined
+      ? { targetCompletionAt: optDate(targetCompletionAt) }
+      : {}),
+  });
   return Response.json({ sprout: updated });
 }
 

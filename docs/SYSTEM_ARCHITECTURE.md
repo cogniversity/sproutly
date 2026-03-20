@@ -86,7 +86,7 @@
 **Contract (me GET):** `{ "user": {...}, "workspaces": [{ id, name, slug, role }] }`
 
 **Plot POST:** `{ "name": string, "description"?: string }`  
-**Sprout POST:** `{ "title": string, "description"?: string, "status"?: enum, "horizon"?: enum }`
+**Sprout POST:** `{ "title": string, "description"?: string, "status"?: enum, "timelineLabel"?: string, "targetCompletionAt"?: string }` plus `POST .../ai/enrich` for AI-filled drafts.
 
 **Errors:** JSON `{ "error": string }`; 400 validation, 401 unauthenticated, 403 forbidden, 404 not found.
 

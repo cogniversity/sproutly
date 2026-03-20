@@ -6,6 +6,9 @@ import * as sprouts from "@/lib/services/sprouts";
 import { resolveLlmApiKey } from "@/lib/services/workspace-ai";
 import { elaborateSproutBodySchema } from "@/lib/validations/api";
 
+const AI_HINT =
+  "Enable AI in Settings (admin) with an OpenAI API key, or set OPENAI_API_KEY on the server.";
+
 export async function POST(
   req: Request,
   ctx: { params: Promise<{ sproutId: string }> },
@@ -33,21 +36,31 @@ export async function POST(
 
   const creds = await resolveLlmApiKey(wsId);
   if (!creds) {
-    return jsonError("AI assist is not available for this workspace.", 503);
+    return Response.json(
+      { error: "AI assist is not available for this workspace.", hint: AI_HINT },
+      { status: 503 },
+    );
   }
 
   let suggestions;
   try {
     if (creds.provider !== "OPENAI") {
-      return jsonError("Only OpenAI is supported for elaboration in this build.", 501);
+      return Response.json(
+        { error: "Only OpenAI is supported for elaboration in this build.", hint: AI_HINT },
+        { status: 501 },
+      );
     }
     suggestions = await elaborateWithOpenAI({
       apiKey: creds.apiKey,
       sproutTitle: sprout.title,
       sproutDescription: sprout.description,
+      plotName: sprout.plot.name,
     });
   } catch {
-    return jsonError("AI assist failed. Try again later.", 502);
+    return Response.json(
+      { error: "AI assist failed. Try again later.", hint: AI_HINT },
+      { status: 502 },
+    );
   }
 
   if (parsed.data.create) {

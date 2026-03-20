@@ -5,6 +5,7 @@ import { getAppSession } from "@/lib/auth";
 import { canReadWorkspace } from "@/lib/authz";
 import * as plots from "@/lib/services/plots";
 import * as sprouts from "@/lib/services/sprouts";
+import { PlotEditForm } from "@/components/plots/plot-edit-form";
 import { PlotSproutsManager } from "@/components/plots/plot-sprouts-manager";
 
 type Props = { params: Promise<{ plotId: string }> };
@@ -42,13 +43,14 @@ export default async function PlotDetailPage({ params }: Props) {
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">
           {plot.name}
         </h1>
-        {plot.description ? (
-          <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-            {plot.description}
-          </p>
-        ) : null}
       </div>
-      <PlotSproutsManager plotId={plotId} initialSprouts={sproutList} />
+      <PlotEditForm workspaceId={plot.workspaceId} plot={plot} />
+      <PlotSproutsManager
+        plotId={plotId}
+        workspaceId={plot.workspaceId}
+        plotName={plot.name}
+        initialSprouts={sproutList}
+      />
     </div>
   );
 }

@@ -42,13 +42,16 @@ export async function POST(
   const parsed = createInitiativeBodySchema.safeParse(body);
   if (!parsed.success) return jsonError("Invalid request", 400);
 
+  const { targetCompletionAt, ...ic } = parsed.data;
   const row = await initiatives.createInitiative({
     workspaceId,
-    name: parsed.data.name,
-    description: parsed.data.description,
-    driUserId: parsed.data.driUserId,
-    startDate: optDate(parsed.data.startDate ?? undefined) ?? null,
-    endDate: optDate(parsed.data.endDate ?? undefined) ?? null,
+    name: ic.name,
+    description: ic.description,
+    driUserId: ic.driUserId,
+    startDate: optDate(ic.startDate ?? undefined) ?? null,
+    endDate: optDate(ic.endDate ?? undefined) ?? null,
+    timelineLabel: ic.timelineLabel,
+    targetCompletionAt: optDate(targetCompletionAt ?? undefined),
   });
   return Response.json({ initiative: row }, { status: 201 });
 }

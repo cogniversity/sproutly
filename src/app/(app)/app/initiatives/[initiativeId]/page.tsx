@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getAppSession } from "@/lib/auth";
 import { canReadWorkspace } from "@/lib/authz";
 import { InitiativeDetailClient } from "@/components/initiatives/initiative-detail";
+import { InitiativeEditForm } from "@/components/initiatives/initiative-edit-form";
 import * as initiatives from "@/lib/services/initiatives";
 
 type Props = { params: Promise<{ initiativeId: string }> };
@@ -27,15 +28,10 @@ export default async function InitiativeDetailPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href="/app/initiatives" className="text-sm text-emerald-700 dark:text-emerald-400">
-          ← Initiatives
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">{row.name}</h1>
-        {row.description ? (
-          <p className="mt-1 text-zinc-600 dark:text-zinc-400">{row.description}</p>
-        ) : null}
-      </div>
+      <Link href="/app/initiatives" className="text-sm text-emerald-700 dark:text-emerald-400">
+        ← Initiatives
+      </Link>
+      <InitiativeEditForm workspaceId={row.workspaceId} initiative={row} />
       <InitiativeDetailClient initiative={row} />
     </div>
   );

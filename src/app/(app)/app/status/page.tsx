@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppSession } from "@/lib/auth";
+import { formatPlanningLine } from "@/lib/timeline";
 import { getWorkspaceStatusSummary } from "@/lib/services/status-summary";
 
 export const metadata: Metadata = {
@@ -61,6 +62,12 @@ export default async function StatusPage({
               <span className="text-zinc-400">· {s.owner.name}</span>
             ) : null}
             <span className="text-xs text-zinc-400">({s.status})</span>
+            <span className="block text-xs text-zinc-400">
+              {formatPlanningLine(
+                s.targetCompletionAt ? new Date(s.targetCompletionAt) : null,
+                s.timelineLabel,
+              )}
+            </span>
             <Link
               href={`/app/plots/${s.plot.id}`}
               className="text-xs text-emerald-700 underline dark:text-emerald-400"

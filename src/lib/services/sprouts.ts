@@ -1,4 +1,4 @@
-import type { Horizon, SproutStatus } from "@prisma/client";
+import type { SproutStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function listSprouts(plotId: string) {
@@ -15,7 +15,8 @@ export async function createSprout(input: {
   title: string;
   description?: string | null;
   status?: SproutStatus;
-  horizon?: Horizon;
+  timelineLabel?: string | null;
+  targetCompletionAt?: Date | null;
   ownerUserId?: string | null;
 }) {
   return prisma.sprout.create({
@@ -25,7 +26,8 @@ export async function createSprout(input: {
       title: input.title,
       description: input.description ?? null,
       status: input.status ?? "BACKLOG",
-      horizon: input.horizon ?? "NONE",
+      timelineLabel: input.timelineLabel ?? null,
+      targetCompletionAt: input.targetCompletionAt ?? null,
       ownerUserId: input.ownerUserId ?? null,
     },
     include: { owner: { select: { id: true, name: true, email: true } } },
@@ -46,7 +48,6 @@ export async function createChildSprouts(
           title: s.title.slice(0, 300),
           description: s.description?.slice(0, 8000) ?? null,
           status: "BACKLOG",
-          horizon: "NONE",
         },
         include: { owner: { select: { id: true, name: true, email: true } } },
       }),
@@ -70,7 +71,8 @@ export async function updateSprout(
     title?: string;
     description?: string | null;
     status?: SproutStatus;
-    horizon?: Horizon;
+    timelineLabel?: string | null;
+    targetCompletionAt?: Date | null;
     ownerUserId?: string | null;
   },
 ) {
