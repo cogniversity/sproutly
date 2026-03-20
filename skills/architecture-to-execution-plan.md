@@ -158,12 +158,13 @@ Keep depth **reasonable**; note **one** sentence per top-level folder.
 
 ---
 
-## Splitting work across agents or engineers
+## Splitting work (parallel tracks in the plan)
 
-- **After foundation**: One agent/engineer goes **vertical** on domain slice (BE+FE+tests); a second starts on **integration** or **second slice**—only if **contracts** (types/OpenAPI) are committed first **or** tasks are truly independent (no shared files).
-- **Avoid**: Two parallel agents touching the same migration chain simultaneously—this produces merge conflicts on migration files. Assign DB migration ownership to one agent at a time; all others wait for it to complete.
-- **Handoffs**: Each handoff task lists **consumer** and **deliverable artifact** (committed schema file, OpenAPI snippet, published package, mock server).
-- **Agent parallelization rule**: Before launching parallel agents, confirm that the tasks share no files in their output set. Anything touching `schema.prisma`, shared route files, or global config must be **serialized**.
+This section describes how to **mark** the plan for parallel execution. Actual parallelization decisions are made by whoever runs the agents (human or orchestrator)—not by the plan itself.
+
+- **Safe to parallelize**: Tasks in the "Parallel tracks" build-order group (from [`brd-engineering-decomposition.md`](brd-engineering-decomposition.md)) that do not share output files. Mark these explicitly in the build order section with a note like "After `<foundation task>` lands: Task A ∥ Task B".
+- **Serialize these**: Anything touching `schema.prisma`, shared migration files, global config, or shared route registries. Mark these with a `(serialize)` annotation in the build order so a reader knows not to run them in parallel.
+- **Handoffs**: Each handoff task must list **consumer** and **deliverable artifact** (committed schema file, OpenAPI snippet, published package, mock server) so the next task knows what to wait for.
 
 ---
 

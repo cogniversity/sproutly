@@ -17,7 +17,7 @@ This folder defines **one skill per agent role**. Each skill is **self-contained
 | 5 | [`architecture-to-execution-plan.md`](architecture-to-execution-plan.md) | Phased plan: ordered tasks (`setup` … `integration`), build order, folder layout, API/DB sequence, env, risks, **MVP vs deferred** |
 | 6 | [`structured-task-to-production-code.md`](structured-task-to-production-code.md) | Code (per scoped task), aligned to architecture + schema + repo patterns |
 
-**Branching**: Step 6 runs **once per implementation task** (or parallel agents on independent tasks), always with the **same** architecture + schema references.
+**Branching**: Step 6 runs **once per implementation task**, always with the **same** architecture + schema references. When multiple tasks are safe to run in parallel (marked in the execution plan build order), multiple agents can be launched independently—but this requires human or orchestrator coordination; the skills themselves do not enforce it.
 
 ---
 
