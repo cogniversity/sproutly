@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum SproutStatus {
+  BACKLOG
+  IN_PROGRESS
+  PAUSED
+  DEPRIORITIZED
+  BLOCKED
+  DONE
+}
+
+enum Horizon {
+  NONE
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  sessions     Session[]
+  memberships  Membership[]
+  ownedSprouts Sprout[]     @relation("SproutOwner")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Workspace {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+  plots       Plot[]
+}
+
+model Membership {
+  id          String         @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        MembershipRole
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([userId, workspaceId])
+}
+
+model Plot {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sprouts     Sprout[]
+
+  @@index([workspaceId])
+}
+
+model Sprout {
+  id          String       @id @default(cuid())
+  plotId      String
+  plot        Plot         @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      SproutStatus @default(BACKLOG)
+  horizon     Horizon      @default(NONE)
+  ownerUserId String?
+  owner       User?        @relation("SproutOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([plotId])
+  @@index([ownerUserId])
+}

@@ -99,6 +99,15 @@ The living product definition—scope, functional requirements, sequencing theme
 
 **[`docs/BUSINESS_REQUIREMENTS_DOCUMENT.md`](docs/BUSINESS_REQUIREMENTS_DOCUMENT.md)** (BRD v4)
 
+**Engineering pipeline (agent skills → artifacts):**
+
+- [`docs/ENGINEERING_DECOMPOSITION.md`](docs/ENGINEERING_DECOMPOSITION.md) — features, epics, tasks  
+- [`docs/SYSTEM_ARCHITECTURE.md`](docs/SYSTEM_ARCHITECTURE.md) — API and boundaries  
+- [`docs/RELATIONAL_SCHEMA.md`](docs/RELATIONAL_SCHEMA.md) — data model (see `prisma/schema.prisma`)  
+- [`docs/EXECUTION_PLAN.md`](docs/EXECUTION_PLAN.md) — phased build order  
+
+See [`skills/README.md`](skills/README.md) for the skill order.
+
 ---
 
 ## Tech stack (this repository)
