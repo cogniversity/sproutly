@@ -2,7 +2,7 @@
 
 **BRD level:** Product (full product vision — startups **and** enterprises building software; phased delivery is an implementation concern, not a scope ceiling)
 
-**Document status:** v3 — admin-only AI config (opaque to other users), **custom DB user management** (no SSO in current phase), **no dedicated reporting** product surface, **email templates + preview** (SMTP sending later).
+**Document status:** v4 — **Leadership / stakeholder reporting** (qualitative “what’s happening,” not metrics-first dashboards); **status digest email** (in progress, recently done, on hold, stuck) with template + preview; v3 retained: admin-only AI, **DB users** (no SSO in current phase); SMTP send still phased.
 
 ---
 
@@ -18,7 +18,7 @@ Sproutly is a **product management platform** that connects execution with strat
 
 ### Goal
 
-Provide **one system of record** where teams can: organize work by **Plot** (product/team/stream); model **Initiatives that span multiple Plots**; plan with **horizons and priorities that tolerate change**; track **releases via Harvests**; visualize **Growth Timelines**; and use **AI to elaborate** new ideas or features into detailed work items—backed by **custom database–based users and roles** (no external IdP required in the current phase). **No separate reporting/analytics product** beyond normal **in-app lists, filters, and detail views**. **Email**: support **creating templates and previewing** rendered output now; **outbound delivery via SMTP (or similar) comes later**.
+Provide **one system of record** where teams can: organize work by **Plot** (product/team/stream); model **Initiatives that span multiple Plots**; plan with **horizons and priorities that tolerate change**; track **releases via Harvests**; visualize **Growth Timelines**; and use **AI to elaborate** new ideas or features into detailed work items—backed by **custom database–based users and roles** (no external IdP required in the current phase). **Leaders and stakeholders** must be able to see **what is happening** through **purpose-built status reporting** (narrative / feature-level, not vanity metrics) and, via email, a **status digest** summarizing **work in progress**, **recently completed**, **on hold**, and **stuck** items. **Email**: **template authoring, preview, and digest composition** in product; **outbound SMTP (or similar) delivery** follows in a later milestone.
 
 ---
 
@@ -32,6 +32,8 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 | Planning flexibility | User-reported fit: “Supports how we actually plan” (survey 1–5) | TBD | ≥ 4.0 | Rolling | Product |
 | AI usefulness | % of AI-assisted breakdown sessions where user **accepts or edits** ≥ 50% of generated tasks | TBD | ≥ TBD with PM | Post-launch AI | Product |
 | Admin & access hygiene | Workspace admins can manage **DB-backed** users and roles; AI settings restricted to admin | N/A | Per FR-012 / FR-013 | Rolling | Eng + Security |
+| Leadership clarity | Leaders report they can answer “what’s in flight, what finished, what’s stuck or parked” **without** exporting to slides | TBD | ≥ 4.5 / 5 on internal survey | Rolling | Product |
+| Digest usefulness | Recipients of **status digest** (preview or sent) rate it **actionable** vs noise | TBD | ≥ TBD with PM | Post-launch | Product |
 
 *Baselines and numeric targets for AI/enterprise should be set with GTM and first design partners.*
 
@@ -74,6 +76,13 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 - **Pain:** Heavy PM tools; still needs releases and clarity.
 - **Uses Sproutly:** Idea → Sprout → optional AI tasking; simple Plots; Harvest when shipping.
 
+### P6 — Dana, Engineering / Product Leader (exec or senior IC)
+
+- **Context:** Needs a **credible picture of delivery** across Plots and Initiatives without digging through every board.
+- **Goal:** See **what’s actively moving**, **what just shipped**, **what’s on hold or deprioritized**, and **what’s stuck**—as **names and short status**, not primarily dashboards of counts.
+- **Pain:** Status meetings rehash lists; email threads replace a system of record.
+- **Uses Sproutly:** **Leadership status** view (FR-018); optional **status digest** email (FR-019); filters by Plot / Initiative / workspace.
+
 ---
 
 ## 4. User Stories & Use Cases
@@ -89,6 +98,8 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 - As a **workspace admin**, I want to **set the AI provider and API key for my organization**, so that **procurement and security stay centralized** and **no other users see vendor or secrets**.
 - As a **PM or IC**, I want to **run “Elaborate with AI”** when my admin has enabled it, so that **I get suggestions without needing to know or choose a model provider**.
 - As an **admin**, I want **database-backed users and roles**, so that **access is manageable without an external IdP in the first phase**.
+- As a **leader**, I want a **summary of work in progress, recently done, on hold, and stuck**, so that **I know what’s happening without a metrics-heavy dashboard**.
+- As a **stakeholder**, I want to **receive (or preview) a status digest email** with those same buckets, so that **I stay aligned when I’m not in the tool daily**.
 
 ### Use case: Customer visit — multi-product configured demo
 
@@ -118,6 +129,15 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 | **Main flow** | 1) Sprout lives in correct Plot → 2) User opens “Elaborate with AI” (only if admin enabled AI) → 3) **No provider picker**—server uses admin-configured provider/key → 4) Review generated tasks/sub-Sprouts → 5) Accept, edit, or reject; audit trail stores prompt hash / model / timestamp **for admin/compliance** (non-admins do not see vendor details in UI) |
 | **Acceptance** | Output attaches to parent Sprout; permissions respected; **no API keys** in any client; non-admin UI does not disclose LLM vendor or model. |
 
+### Use case: Leadership check-in / status digest
+
+| Step | Description |
+|------|-------------|
+| **Actor** | Leader (Dana) or PM preparing for exec sync |
+| **Trigger** | Weekly leadership review or ad-hoc “where are we?” |
+| **Main flow** | 1) Open **Leadership / status** view (scope: workspace, Plot, or Initiative) → 2) Scan sections **In progress**, **Done (recent)**, **On hold**, **Stuck** → 3) Optionally **preview** the **status digest** email with the same sections populated from live data → 4) When SMTP exists, send digest to a defined recipient list |
+| **Acceptance** | Each section lists relevant Sprouts (or agreed rollup entity) with **title, owner, short status**; empty sections show a clear empty state; **digest preview** matches in-app semantics; permissions respected (no cross-workspace leakage). |
+
 ### Edge cases
 
 - Initiative with **zero** Sprouts yet (planning shell).
@@ -143,13 +163,14 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 | **AI-assisted elaboration** | From idea or feature Sprout: generate structured breakdown using an LLM **chosen and credentialed only by workspace admin** (implementation supports **OpenAI**, **Anthropic Claude**, **Google Gemini** behind the scenes). **Non-admin users** have **no visibility** into provider, model, or keys. |
 | **Startups** | Low-friction defaults: few Plots, optional Initiatives, AI off until admin configures. |
 | **Enterprises** | **Custom DB-backed** users, roles, org/workspace boundaries; audit logs where specified (NFRs). **SSO/SAML** is **out of scope for the current phase** (may return on roadmap). |
-| **Email (phase 1)** | **Template authoring** (create/edit) and **preview** (rendered HTML/text with sample or live merge fields). **No requirement** for outbound SMTP send in this phase. |
+| **Leadership & stakeholder reporting** | **In-app** views aimed at **leaders and stakeholders**: qualitative roll-ups of work **in progress**, **recently completed**, **on hold**, and **stuck** (see FR-018). **Not** a metrics-first BI product—**feature/status narrative** first. |
+| **Email (phase 1)** | **Template authoring** (create/edit) and **preview**, including a **status digest** layout that mirrors FR-018 (**FR-017**, **FR-019**). **No requirement** for outbound SMTP in the same milestone as first preview. |
 | **Integrations (phased)** | At minimum roadmap: GitHub / Jira / Slack **as connectors** for status or link-out (depth phased; not all in v1 engineering). |
 
 ### Out of scope (explicit)
 
-- **Dedicated reporting / BI / analytics** product (dashboards, scheduled exports, cross-workspace rollups). **In-app** lists, filters, Harvest detail, and Initiative views **are** in scope.
-- **Outbound email delivery** (SMTP, SES, etc.) in the **same phase** as template + preview—**planned later** once templates exist.
+- **General-purpose BI / data warehouse** (arbitrary SQL, custom cube analytics, embedded third-party BI suites). **Sproutly-native** leadership and status views **are** in scope (FR-018).
+- **Outbound email delivery** (SMTP, SES, etc.) in the **same phase** as first template + digest **preview**—**planned later** (sequencing §11).
 - **SSO / SAML / OIDC** for the **current** identity phase (custom DB users only until re-scoped).
 - Replacing full **source control** or **CI/CD** execution inside Sproutly.
 - **Fully automatic** roadmap prioritization without human approval (recommendation UIs may come later; human-in-the-loop for AI breakdown is default).
@@ -158,7 +179,7 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 
 ### Phased delivery note
 
-Engineering may ship **capabilities in waves** (foundation → core objects → Initiatives → AI admin + assist → enterprise hardening without SSO → SMTP). **Phasing does not reduce the BRD’s target end state** above (except items explicitly **out of scope** for the current phase, e.g. SSO, reporting suite, SMTP).
+Engineering may ship **capabilities in waves** (foundation → core objects → status model → **leadership views + digest preview** → Initiatives → AI admin + assist → enterprise hardening without SSO → SMTP). **Phasing does not reduce the BRD’s target end state** above (except items explicitly **out of scope** for the current phase, e.g. SSO, general-purpose BI, initial SMTP).
 
 ---
 
@@ -220,7 +241,7 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 
 - Harvest detail lists scoped work; Sprout shows **target** and/or **actual** Harvest.
 - Support **multiple Harvests** over time; avoid duplicate “shipped” claims (enforce or warn per product rules).
-- Harvest **detail view** lists scoped work (read-only list in product UI; **not** a separate reporting/export module).
+- Harvest **detail view** lists scoped work; may link to **leadership / status** views (FR-018) where helpful.
 
 **FR-009 — Growth Timeline**  
 **Requirement:** Timeline views for Sprout, Plot, Initiative, and Harvest-scoped work.  
@@ -280,12 +301,35 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 - No lost updates under normal concurrent edits (last-write-wins or merge strategy documented); real-time optional.
 
 **FR-017 — Email templates (authoring & preview)**  
-**Requirement:** Admins (or designated editors) can **create and edit** email **templates** (subject + body with merge fields). Users can **preview** rendered output (sample data or live context as designed).  
+**Requirement:** Admins (or designated editors) can **create and edit** email **templates** (subject + body with merge fields). Users can **preview** rendered output (sample data or **live workspace context** as designed).  
 **Acceptance criteria:**
 
-- At least one template type supported end-to-end in UI (e.g. “Invite user” or “Harvest summary”—exact set in UX spec).
+- Template catalog includes at least: **(a)** operational template (e.g. invite or account-related—exact label in UX spec) and **(b)** **status digest** structure per **FR-019**.
 - Preview shows final HTML/text as it **would** send once delivery exists.
 - **Outbound sending** via SMTP (or provider) is **explicitly out of scope** for this FR’s completion—no production mail path required until a later milestone.
+
+**FR-018 — Leadership & stakeholder status (in-app reporting)**  
+**Requirement:** Role-appropriate users (e.g. **Viewer** and above, or a future **Leader** role—RBAC in FR-013) can open a **Leadership / status** experience scoped by **workspace**, and optionally filtered by **Plot** and/or **Initiative**. The view is organized into **four narrative sections** (not KPI dashboards):  
+1. **In progress** — active, in-flight Sprouts (or agreed rollup).  
+2. **Done (recent)** — completed **within a configurable time window** (default e.g. last 14 days, product-defined).  
+3. **On hold** — explicitly **paused**, **deprioritized**, or equivalent lifecycle states from FR-005 / FR-007.  
+4. **Stuck** — items flagged **blocked** and/or matching an org rule (e.g. no stage movement for **N** days—**N** configurable or template default).  
+
+**Acceptance criteria:**
+
+- Each listed item shows at least **title**, **owner** (or “Unassigned”), and **short status** (stage + optional note).
+- **Primary value is qualitative lists**; optional **small counts** per section are allowed but must not dominate the layout.
+- Empty sections: clear messaging (“Nothing stuck this week”).
+- Respects permissions: user sees only authorized workspaces and Plots; **no** cross-tenant data.
+- Export to **PDF or static share link** is **optional** later—not required for FR-018 completion.
+
+**FR-019 — Status digest email (content + preview; send later)**  
+**Requirement:** The product supports a **status digest** email that **mirrors FR-018**: same four sections (**In progress**, **Done (recent)**, **On hold**, **Stuck**) populated from **live** workspace data. Recipients and schedule are **configuration** (when SMTP exists); for the **preview phase**, user can generate **preview for a chosen scope** (workspace / Plot / Initiative) and recipient list **simulation** (optional).  
+**Acceptance criteria:**
+
+- Digest **preview** renders the four sections with the **same inclusion rules** as FR-018 (document shared logic / single source of truth in architecture).
+- Copy is **narrative** (feature names + status)—not a chart of numbers.
+- **SMTP / actual send** out of scope for FR-019 completion until the **outbound email** milestone (§11).
 
 ---
 
@@ -299,7 +343,7 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 | **NFR-Privacy-AI** | Privacy (AI) | **Admin-facing** disclosure of **subprocessors** / data flow for the **active** provider; **customer API keys** (admin-entered) stored in a **secure vault**, never echoed to non-admin clients. |
 | **NFR-A11y** | Accessibility | **WCAG 2.1 Level AA** for primary workflows. |
 | **NFR-Observability** | Observability | Structured logs, metrics, tracing; correlation IDs. |
-| **NFR-Audit** | Compliance | **Audit log** of security-relevant actions (login, role change, AI settings change, user invite) for **admin review in product**—**not** a separate reporting suite. |
+| **NFR-Audit** | Compliance | **Audit log** of security-relevant actions (login, role change, AI settings change, user invite) for **admin review in product**. Distinct from **FR-018** leadership reporting (operational security vs delivery visibility). |
 | **NFR-Compliance** | Compliance | GDPR-oriented data handling; enterprise DPA path; SOC2 **roadmap** as GTM requires. |
 
 ---
@@ -353,7 +397,8 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 | OQ-2 | **Harvest** ↔ **versioning** (semver) — required fields for enterprise? | Product |
 | OQ-3 | **Initiative** Gantt/timeline vs board-first? | Product + Design |
 | OQ-4 | **Real-time** collab priority tier? | Product |
-| OQ-5 | Which **email templates** are mandatory for v1 (invite vs notifications only)? | Product |
+| OQ-5 | Which **email templates** are mandatory for v1 beyond **status digest** (invite, password reset, etc.)? | Product |
+| OQ-6 | **“Stuck”** definition: **blocked flag only** vs **blocked OR stale** (no progress in **N** days)—default **N**? | Product + Eng |
 
 ---
 
@@ -364,14 +409,15 @@ Deliverable milestones (**dependencies**, not calendar promises):
 1. **Foundation** — **DB-backed** auth baseline (FR-013), workspace shell, core UI patterns, observability; **FR-017** template storage + preview when auth flows need it.
 2. **Plots & Sprouts** — FR-001, FR-002, FR-004 (basic), FR-006–FR-007, FR-010.
 3. **Flexible planning** — FR-005, deprioritized/paused flows, optional sprint view.
-4. **Initiatives** — FR-003 end-to-end + cross-Plot filters and Initiative detail (no reporting module).
-5. **Harvests** — FR-008 as **release system of record** + FR-009 alignment.
-6. **AI elaboration** — FR-011, FR-012, NFR-Privacy-AI; ship with **one** provider first if needed, architecture for three.
-7. **Enterprise hardening (without SSO)** — FR-014, NFR-Audit, scale, security review (**SSO** remains future unless re-scoped).
-8. **Integrations & polish** — FR-015, FR-016 (real-time if prioritized), WCAG hardening.
-9. **Outbound email** — SMTP (or provider) + wire FR-017 templates to actual send (**after** preview ships).
+4. **Initiatives** — FR-003 end-to-end + cross-Plot filters and Initiative detail.
+5. **Leadership status & digest preview** — FR-018 (in-app) + **FR-019 preview** + **FR-017** templates (depends on FR-005 / FR-007 for states **stuck** / **on hold** semantics).
+6. **Harvests** — FR-008 as **release system of record** + FR-009 alignment.
+7. **AI elaboration** — FR-011, FR-012, NFR-Privacy-AI; ship with **one** provider first if needed, architecture for three.
+8. **Enterprise hardening (without SSO)** — FR-014, NFR-Audit, scale, security review (**SSO** remains future unless re-scoped).
+9. **Integrations & polish** — FR-015, FR-016 (real-time if prioritized), WCAG hardening.
+10. **Outbound email** — SMTP (or provider) + send **FR-017 / FR-019** digests and other templates (**after** preview ships).
 
-**Depends on:** 2 before 3–4; 6 after admin settings exist; **SMTP milestone** after FR-017; SSO not a gate for current BRD.
+**Depends on:** FR-018/019 logic shared—implement **one** “status summary” source; **SMTP** after preview; SSO not a gate for current BRD.
 
 ---
 
@@ -382,3 +428,4 @@ Deliverable milestones (**dependencies**, not calendar promises):
 | 2026-03-20 | Initial BRD v1 from README + product-brd-generation skill | All |
 | 2026-03-20 | **v2:** Full product scope — startups + enterprises; **Initiatives** (multi-Plot); flexible non-sprint planning; **Harvest** as release hub; **AI breakdown** (OpenAI / Claude / Gemini); enterprise SSO/RBAC/audit; integrations phased; expanded FRs/NFRs/personas/use cases | All |
 | 2026-03-20 | **v3:** **Admin-only** AI provider + key; **opaque** to other personas; **custom DB users** (SSO out for current phase); **no reporting product**; **email templates + preview**; SMTP later (**FR-017**); NFR-Audit without reporting framing | All |
+| 2026-03-20 | **v4:** **Leadership / stakeholder reporting** (**FR-018**)—qualitative buckets: in progress, recently done, on hold, stuck; **status digest email** (**FR-019**) + **FR-017**; **out of scope** narrowed to general BI/warehouse only; metrics deprioritized vs narrative | Overview, Scope, FRs, Sequencing, Personas, Metrics |
