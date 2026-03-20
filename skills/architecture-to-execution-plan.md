@@ -117,6 +117,7 @@ Keep depth **reasonable**; note **one** sentence per top-level folder.
 
 ### 4. API implementation plan
 
+- **Source of truth**: Use the **API contract** from the architecture document (OpenAPI fragment or per-route field lists) as the authoritative endpoint spec. Do not invent or re-derive endpoint shapes here.
 - **Ordered list** of endpoints to build (or endpoint groups), **first to last**.
 - **Map** each to **feature / epic** (and related tables).
 - **Dependencies**: required migrations, auth middleware, external client ready, feature flags.
@@ -150,18 +151,20 @@ Keep depth **reasonable**; note **one** sentence per top-level folder.
 
 ## Iterating after initial implementation
 
-- **Weekly rhythm**: Demo → capture gaps → insert **small** tasks into **Enhancements** phase; avoid reopening closed migrations without additive migrations.
-- **Schema changes**: Prefer **forward-only** migrations; document **backfill** tasks if needed.
+- **Per-cycle rhythm**: After each implementation pass, demo → capture gaps → insert **small** tasks into the **Enhancements** phase. Avoid reopening closed migrations; prefer additive migrations instead.
+- **Schema changes**: Prefer **forward-only** migrations; document **backfill** tasks explicitly when needed.
 - **API versioning**: When breaking clients, add **v2** tasks explicitly—don’t retrofit silently.
 - **Traceability**: Optionally tag tasks with `Feature: …` / `Epic: …` for churn tracking.
 
 ---
 
-## Splitting work across engineers
+## Splitting work (parallel tracks in the plan)
 
-- **After foundation**: Engineer A **vertical** on domain slice (BE+FE+tests); Engineer B on **integration** or **second slice**—only if **contracts** (types/OpenAPI) land first **or** tasks are truly independent.
-- **Avoid**: Two engineers editing same migration chain simultaneously—**serialize** DB ownership or use **branching strategy** with clear merge order.
-- **Handoffs**: Each handoff task lists **consumer** and **deliverable artifact** (published package, schema file, mock server).
+This section describes how to **mark** the plan for parallel execution. Actual parallelization decisions are made by whoever runs the agents (human or orchestrator)—not by the plan itself.
+
+- **Safe to parallelize**: Tasks in the "Parallel tracks" build-order group (from [`brd-engineering-decomposition.md`](brd-engineering-decomposition.md)) that do not share output files. Mark these explicitly in the build order section with a note like "After `<foundation task>` lands: Task A ∥ Task B".
+- **Serialize these**: Anything touching `schema.prisma`, shared migration files, global config, or shared route registries. Mark these with a `(serialize)` annotation in the build order so a reader knows not to run them in parallel.
+- **Handoffs**: Each handoff task must list **consumer** and **deliverable artifact** (committed schema file, OpenAPI snippet, published package, mock server) so the next task knows what to wait for.
 
 ---
 

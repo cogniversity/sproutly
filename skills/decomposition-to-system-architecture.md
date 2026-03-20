@@ -72,6 +72,7 @@ If decomposition is backend-heavy with minimal FE tasks, keep this section short
 - **Business logic boundaries**: Domain modules; what **must not** leak into controllers/route handlers (validation vs policy vs persistence).
 - **AuthN / AuthZ**: Session vs JWT, where tokens live, refresh strategy sketch, **how roles/scopes are enforced** (middleware, policy layer, row-level rules).
 - **Async work** (if tasks imply it): queues, outbox, webhooks, schedulers—only when decomposition needs it.
+- **Request handling layers**: Describe the per-request path in one line: router → validation → handler → service → repository. Only call out deviations from this order.
 
 ### 4. API Design
 
@@ -87,14 +88,12 @@ Provide a **table** of endpoints (no wall of prose):
 - **Versioning** note if public API or mobile clients (e.g., `/v1` prefix).
 - **Idempotency**, pagination, and error shape—mention where non-trivial (brief).
 
-**Separation of concerns**: One bullet line per layer—router → validation → handler → service → repository—where applicable.
-
-**API contract handoff (for later agents)** — when APIs are non-trivial, add **one** of:
+**API contract (required for non-trivial APIs)** — always provide **one** of:
 
 - **OpenAPI 3** fragment (`paths` + shared `components/schemas`) consistent with the endpoint table, **or**
-- **Per-route** request/response **field lists** + **HTTP status** matrix (minimum bar if OpenAPI is skipped).
+- **Per-route** request/response **field lists** + **HTTP status** matrix.
 
-Implementation agents ([`structured-task-to-production-code.md`](structured-task-to-production-code.md)) and schema agents should treat this as the **default contract** unless the user overrides it.
+If the API is trivial (one or two simple CRUD endpoints with no shared types), a brief inline field list is sufficient. Do not skip this entirely: implementation agents and schema agents treat this contract as **authoritative**.
 
 ### 5. Data Flow
 
@@ -137,26 +136,22 @@ Table format:
 
 If the user **mandated** a stack, **adopt it** and skip second-guessing except for risk flags.
 
----
+### 9. Key architectural decisions & tradeoffs
 
-## Key architectural decisions & tradeoffs
-
-Include a short subsection (bullets):
+Required output. For each decision below, answer: **Decision chosen** → **Why** → **Cost / downside** → **Revisit when**.
 
 - **Monolith vs modular monolith vs services**: Pick for **team size** and **decomposition**; state **trigger** to split (e.g., independent deploy cadence, different scaling profile).
 - **REST vs GraphQL vs RPC**: Default **REST** for MVP unless decomposition screams graph aggregation or strong typing across many clients—justify.
 - **Sync vs async**: When webhooks/jobs win over inline API.
 - **Tenancy**: Single DB schema + tenant_id vs separate schemas—**one** choice + migration note.
 
-Each bullet: **Decision** → **Why** → **Cost** → **Revisit when**.
+### 10. Evolution path
 
----
-
-## Evolution as the product grows
+Required output. Describes what changes as the product grows—without building for it up front.
 
 - **0 → 1**: Single deploy unit, feature flags, minimal services, strong module boundaries in code.
 - **Growth triggers**: Sustained **SLO misses**, **team parallelization pain**, **compliance boundary**, **integration sprawl**—tie each to a **concrete next step** (read replica, extract worker, API gateway, event bus)—**only as a staged path**, not upfront build.
-- **Deprecation**: How to add **v2** APIs without breaking mobile (versioned routes, sunset policy sketch).
+- **Deprecation**: How to add **v2** APIs without breaking existing clients (versioned routes, sunset policy sketch).
 
 ---
 
@@ -172,7 +167,8 @@ Each bullet: **Decision** → **Why** → **Cost** → **Revisit when**.
 ## Handoff checklist
 
 - [ ] Every **feature** appears in **overview coverage** and maps to FE/BE/DB/integration surfaces.
-- [ ] **API table** is consistent (no duplicate conflicting methods/paths unless versioned on purpose).
+- [ ] **API table** is complete; **API contract** (OpenAPI or field lists) is present for non-trivial APIs.
 - [ ] **Data flow** reflects auth and persistence reality.
 - [ ] **NFRs** use mechanisms or measurable guards—not adjectives.
-- [ ] **Decisions** document tradeoffs and when to reconsider.
+- [ ] **Decisions** (section 9) document tradeoffs and revisit triggers.
+- [ ] **Evolution path** (section 10) describes staged growth, not upfront over-engineering.

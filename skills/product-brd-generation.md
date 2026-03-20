@@ -43,11 +43,13 @@ Before drafting (or alongside a **draft marked “Assumptions”**), ask **targe
 
 ## BRD levels (pick one per engagement)
 
-| Level | Focus | Typical length | Emphasis |
-|-------|--------|----------------|----------|
-| **Feature** | One capability or flow | Short | User stories, acceptance criteria, edge cases, rollout |
-| **Product** | Broader offering / initiative | Medium | Personas, roadmap themes, multiple workstreams, metrics |
-| **MVP** | Smallest shippable slice | Shortest | Ruthless in/out of scope, “not now” list, validation plan |
+| Level | When to use | Focus | Emphasis |
+|-------|-------------|-------|----------|
+| **Feature** | Extending an existing product with one capability or flow | Acceptance criteria, edge cases, rollout | User stories, testable AC, blast-radius on existing code |
+| **Product** | New offering or multi-workstream initiative | Personas, metrics, multiple outcomes | Roadmap themes, constraints, stakeholder alignment |
+| **MVP** | First shippable version of an unproven idea | Ruthless scope reduction | In/out of scope, validation plan, “not now” list |
+
+**Selection heuristic**: Working product + one new thing → **Feature**. Launching from scratch or re-platforming → **MVP** (scope still being shaped) or **Product** (scope reasonably defined across multiple workstreams).
 
 State the chosen level at the top of the BRD (`**BRD level:** …`).
 
@@ -123,12 +125,12 @@ Each NFR should be **measurable** or **verifiable** (e.g., “Secrets not logged
 - **Risks**: Likelihood/impact (lightweight: H/M/L), **mitigation**, **owner**.
 - **Open questions**: Unresolved decisions; tie each to **who** should answer and **by when** if known.
 
-### 11. Milestones / Timeline (high-level roadmap)
+### 11. Ordering themes / sequencing (high-level roadmap)
 
-- Phases such as *Discovery → Build → Beta → GA* (adjust to context).
-- Per milestone: **deliverable**, **target window** (quarter/month/week as appropriate), **dependencies**.
-
-Do not invent precise dates without input; use **relative** or **TBD** with what’s needed to firm dates.
+- Name phases as **deliverable milestones**, not calendar dates: e.g., *Discovery done → Core journey shippable → Beta-ready → GA*.
+- Per milestone: **deliverable** (what is true when complete), **depends on** (upstream milestone or decision), **open blocker** (if any).
+- Avoid calendar commitments unless the user has given fixed dates. When dates exist, record them but flag any that drive scope decisions.
+- When downstream agents own implementation, sequencing clarity (what before what) matters more than timeline estimates.
 
 ---
 
@@ -181,18 +183,20 @@ Do not invent precise dates without input; use **relative** or **TBD** with what
 
 ## Anti-patterns (avoid)
 
-- Generic benefits with no owner or metric.
-- Requirements that cannot be tested or demoed.
-- Hiding ambiguity inside buzzwords.
-- Enterprise-only artifacts (steer committees, RACI matrices) unless explicitly requested.
+- Objectives phrased as activities ("Build a dashboard") instead of outcomes ("Reduce time-to-insight for team leads").
+- Metrics without baseline or time window ("Increase retention" is not a metric).
+- Acceptance criteria that require subjective judgment to evaluate ("looks good," "is intuitive").
+- Scope creep disguised as assumptions ("We assume SSO will be added later"—if it's out of scope, say so explicitly).
+- Enterprise ceremony added by default: steer committees, RACI, executive summaries—only include when asked.
 
 ---
 
 ## Closing checklist (before handing off)
 
 - [ ] BRD level stated (feature / product / MVP).
-- [ ] Every functional requirement has acceptance criteria.
-- [ ] NFRs included only where relevant—and are measurable where possible.
-- [ ] Out-of-scope is explicit.
-- [ ] Open questions have clear owners or next step.
-- [ ] Document reads like a **build brief**, not a slide deck.
+- [ ] Selection heuristic applied—level choice is defensible.
+- [ ] Every functional requirement has testable acceptance criteria (given/when/then or checklist).
+- [ ] NFRs are measurable or verifiable—no adjectives without targets.
+- [ ] Out-of-scope is explicit (not implied by omission).
+- [ ] Open questions have clear owners or a concrete next step.
+- [ ] Section 11 uses milestone names and dependency ordering, not calendar dates.

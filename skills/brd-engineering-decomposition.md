@@ -115,7 +115,7 @@ For **each task**:
 |-------|-------------------------|
 | **Title** | Imperative, specific: “Add POST /v1/invites with idempotency key”—not “Work on API.” |
 | **Description** | **What** to implement, **key files/areas** if known, **how to verify** (tests, checklist, screenshot). |
-| **Type** | One of: `frontend`, `backend`, `database`, `integration` (use **closest primary**; mention secondary in description if split is artificial). |
+| **Type** | One of: `setup`, `frontend`, `backend`, `database`, `integration` (use **closest primary**; mention secondary in description if split is artificial). `setup` = repo/tooling/environment/CI with no user-visible output. |
 | **Priority** | `high`, `medium`, `low` (aligned to MVP critical path). |
 | **Estimated effort** | `S`, `M`, `L`: **S** = small single focused change; **M** = multi-file / moderate complexity; **L** = large cohesive slice—**split** if it spans unrelated concerns or blocks parallel work. (Aligns with [`architecture-to-execution-plan.md`](architecture-to-execution-plan.md).) |
 | **Dependencies** | Other **task titles** or **external** deps (API keys, design, legal); `none` if truly independent. |
@@ -145,7 +145,7 @@ For **each task**:
 
 ## Iterating as requirements evolve
 
-1. **Track the source**: Optionally prefix epic or task with BRD refs (`FR-03`, `NFR-Performance`) when the doc has IDs.
+1. **Track the source**: Optionally prefix epic or task with BRD refs (`FR-001`, `NFR-Performance`) when the doc has IDs. Use the same ID format as the BRD skill uses (`FR-001`, `FR-002`, …).
 2. **Scope change**: Move tasks; **don’t** leave orphaned duplicates—**retire** superseded tasks with a one-line “Superseded by …” in a changelog block at bottom.
 3. **New BRD version**: Add `**Changelog**` with date + what shifted (features added/removed, epics merged).
 4. **Splitting work mid-flight**: Replace one task with **2+** tasks that each remain actionable; update **Dependencies**.
@@ -153,11 +153,13 @@ For **each task**:
 
 ---
 
-## Optional closing sections (use when helpful)
+## Required closing sections
 
-- **Critical path**: Ordered list of task titles for fastest MVP.
-- **Parallel tracks**: Groups safe to run concurrently.
-- **Open engineering questions**: Unknowns that block estimates (spike tasks link here).
+These are consumed by the **execution plan** skill and must be present in the output:
+
+- **Critical path**: Ordered list of task titles that block the fastest MVP path. The execution plan uses this to sequence phases.
+- **Parallel tracks**: Groups of tasks safe to run concurrently (after shared foundation). Used by the execution plan to identify parallelization opportunities.
+- **Open engineering questions**: Unknowns that block estimates; spike tasks link here. Include even if the list is short.
 
 ---
 
@@ -167,6 +169,7 @@ For **each task**:
 - Mirror-image tasks duplicating the same acceptance criteria.
 - Tasks with **no verification** path.
 - Priority **high** on everything.
+- Omitting auth/permission tasks: if the BRD implies “only owners can edit” or “admin-only view,” there must be a concrete task for the authZ rule—not a sentence buried in a description.
 
 ---
 
@@ -177,3 +180,5 @@ For **each task**:
 - [ ] **Tasks** are actionable, typed, prioritized, estimated, dependency-aware.
 - [ ] **MVP vs full** and **team size** assumptions stated.
 - [ ] No generic/vague task titles.
+- [ ] Auth/permission boundaries from the BRD are captured as explicit tasks (not assumed).
+- [ ] **Critical path** and **Parallel tracks** sections are present.

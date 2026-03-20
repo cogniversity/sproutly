@@ -17,7 +17,7 @@ This folder defines **one skill per agent role**. Each skill is **self-contained
 | 5 | [`architecture-to-execution-plan.md`](architecture-to-execution-plan.md) | Phased plan: ordered tasks (`setup` … `integration`), build order, folder layout, API/DB sequence, env, risks, **MVP vs deferred** |
 | 6 | [`structured-task-to-production-code.md`](structured-task-to-production-code.md) | Code (per scoped task), aligned to architecture + schema + repo patterns |
 
-**Branching**: Step 6 runs **once per implementation task** (or parallel agents on independent tasks), always with the **same** architecture + schema references.
+**Branching**: Step 6 runs **once per implementation task**, always with the **same** architecture + schema references. When multiple tasks are safe to run in parallel (marked in the execution plan build order), multiple agents can be launched independently—but this requires human or orchestrator coordination; the skills themselves do not enforce it.
 
 ---
 
@@ -92,17 +92,5 @@ After material design decisions:
 ## Drift control
 
 - **Single source of truth per concern**: BRD (why), decomposition (what work), architecture (how pieces talk), schema (persistent truth), plan (order), code (reality).
-- If a later agent **contradicts** an earlier artifact, **stop** and reconcile (or document **Assumptions** + **Open questions**) instead of silently patching.
-
----
-
-## File index
-
-| File | Role |
-|------|------|
-| `product-brd-generation.md` | Product requirements |
-| `brd-engineering-decomposition.md` | Work breakdown |
-| `decomposition-to-system-architecture.md` | Technical design |
-| `architecture-to-relational-schema.md` | Data model |
-| `architecture-to-execution-plan.md` | Sequencing & setup |
-| `structured-task-to-production-code.md` | Implementation |
+- If **any** agent contradicts an earlier artifact, **stop** and reconcile (or document **Assumptions** + **Open questions**) instead of silently patching. This applies at every step—not only architecture.
+- **Upstream errors surfaced late**: If a code or schema agent discovers an inconsistency in an upstream artifact (wrong endpoint shape, missing column, scope gap), surface it explicitly and trace it back to the source document before proceeding.
