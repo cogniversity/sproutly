@@ -1,149 +1,155 @@
 # 🌱 Sproutly
-Grow your product with clarity. Plan roadmaps, track ownership, and visualize delivery timelines from sprints to yearly releases.
 
-It is a modern product management platform that helps teams grow ideas into shipped features.
-lan roadmaps, track ownership, and manage delivery timelines—from daily tasks to yearly strategy—all in one place.
+Grow your product with clarity. Plan roadmaps, track ownership, and see what’s actually happening—from **ideas** to **releases**—without forcing every team into the same sprint-shaped box.
 
----
-
-## 🚀 Why Sproutly?
-
-Product teams often struggle to answer simple questions:
-
-* Who is working on what?
-* When will it be delivered?
-* How does today’s work connect to long-term goals?
-
-Sproutly brings clarity by connecting **execution with strategy**—so your team can move fast *and* stay aligned.
+Sproutly is a product management platform for **startups and enterprises** that ship software. It connects **execution with strategy** using a simple metaphor: **Sprouts** (the work), **Plots** (where it lives—products, teams, or streams), **Initiatives** (efforts that cut across Plots), and **Harvests** (what ships together).
 
 ---
 
-## 🌿 Core Features
+## Why Sproutly?
 
-### 🗺️ Roadmap Planning
+Teams struggle to answer:
 
-* Visualize product direction across **daily, weekly, monthly, quarterly, and yearly** timelines
-* Align features with strategic goals
-* Flexible views for startups and scaling teams
+* Who owns what—and what’s **in progress**, **recently done**, **on hold**, or **stuck**?
+* How does today’s work connect to longer-term goals?
+* How do you track work that **spans multiple products** (a big customer visit, a platform migration) in one place?
 
-### 👥 Ownership Tracking
-
-* Clearly assign **who’s responsible for what**
-* Avoid confusion and duplicate work
-* Improve accountability across teams
-
-### ⏳ Delivery Timeline
-
-* Track progress from idea → development → release
-* Set expectations without micromanaging hourly work
-* Focus on meaningful milestones instead of noise
-
-### 🌱 Growth-Centric Workflow
-
-* Turn ideas into **Sprouts** (features/tasks)
-* Organize work into **Plots** (projects/teams)
-* Plan releases as **Harvests**
-* Track progress through a **Growth Timeline**
+Sproutly is built for **honest prioritization**: you can pause or deprioritize without losing history, plan with **horizons** (daily → yearly) even when you don’t run rigid sprints, and give **leaders a narrative view** of status—not a wall of vanity metrics.
 
 ---
 
-## 🧭 How It Works
+## Core concepts
 
-1. **Plant Ideas** 🌱
-   Capture features, tasks, or initiatives as *Sprouts*
-
-2. **Organize Work** 🌿
-   Group Sprouts into projects or teams (*Plots*)
-
-3. **Plan the Roadmap** 🗺️
-   Map work across time horizons (daily → yearly)
-
-4. **Track Progress** ⏳
-   Monitor delivery and ownership in real time
-
-5. **Ship & Grow** 🚀
-   Deliver releases (*Harvests*) and iterate continuously
+| Concept | What it is |
+|--------|------------|
+| **Sprout** | An idea, feature, task, or initiative—something you’re growing from concept to delivery. |
+| **Plot** | The primary “home” for a Sprout—usually a product, team, or stream. |
+| **Initiative** | A program that **links multiple Plots** (e.g. multi-product demos, cross-cutting infra). Sprouts can belong to a Plot and tie into Initiatives. |
+| **Harvest** | A **release**: what goes out together, with target and shipped context. |
+| **Growth timeline** | How progress reads over time—for a Sprout, Plot, Initiative, or release. |
 
 ---
 
-## 🎯 Who Is It For?
+## What you can do
 
-* Startup product teams
-* Founders managing product execution
-* Product managers juggling roadmap + delivery
-* Engineering teams needing clarity without micromanagement
+### Roadmap & planning
+
+* Map work across **daily, weekly, monthly, quarterly, and yearly** horizons.
+* Use **sprints or cycles only if you want them**—they’re optional, not the only model.
+* Mark work **active**, **paused**, or **deprioritized** so reprioritization stays visible.
+
+### Ownership & delivery
+
+* Assign **who’s responsible** for Sprouts, Initiatives, and Harvests.
+* Track stages from idea → development → release without micromanaging hourly tasks.
+
+### Cross-product programs
+
+* Run **Initiatives** that touch several Plots so customer visits, migrations, and shared programs have **one narrative and DRI**.
+
+### Leadership & stakeholders
+
+* **Status reporting** focused on **what’s happening**: in progress, recently completed, on hold, and stuck—with titles, owners, and short status (not metrics-first dashboards).
+* **Status digest email**: same story as a **previewable** digest (template + live data); **outbound SMTP** comes in a later milestone.
+
+### AI-assisted breakdown
+
+* Turn a **Sprout** (idea or feature) into a structured task breakdown with **AI assist**—when your workspace admin enables it.
+* **Provider and API keys are admin-only**; everyone else sees a generic assist experience (no vendor pickers or secrets in the UI).
+
+### Access (current direction)
+
+* **Users and roles live in the application database** (custom user management). Enterprise **SSO** is on the roadmap, not the first-phase requirement in the product spec.
 
 ---
 
-## ✨ Philosophy
+## How it works
 
-Sproutly is built on a simple idea:
+1. **Plant** — Capture work as **Sprouts** (from a raw idea or inside an existing Plot).
+2. **Organize** — Give each Sprout a **Plot**; link related work to **Initiatives** when it spans products or teams.
+3. **Plan** — Set **horizons** and honest lifecycle states; add **sprints** only if that’s how you work.
+4. **Track** — Use the **Growth timeline** and ownership so progress is visible.
+5. **Ship** — Bundle scope into **Harvests** so releases are explicit.
+6. **Align** — Leaders use **status views** and (when mail is wired up) **digests** to stay in sync.
+
+---
+
+## Who it’s for
+
+* Product and engineering teams at **startups** and **enterprises**
+* **Leaders** who need a clear story of delivery without building slides every week
+* **Platform / engineering leads** running programs across multiple products
+* **Solutions and customer-facing roles** coordinating work across several Plots
+
+---
+
+## Philosophy
 
 > Great products don’t just get built — they grow.
 
-Instead of rigid project tracking, Sproutly embraces:
-
-* 🌱 Growth over control
-* 🔍 Clarity over complexity
-* 🚀 Momentum over micromanagement
+* Growth over control  
+* Clarity over complexity  
+* Momentum over micromanagement  
 
 ---
 
-## 🛠️ Tech Stack (example)
+## Product requirements
 
-> अपडेट this section based on your implementation
+The living product definition—scope, functional requirements, sequencing themes, and open questions—is in:
 
-* Frontend: React / Next.js
-* Backend: Node.js / Express
-* Database: PostgreSQL
-* Hosting: AWS / Vercel
+**[`docs/BUSINESS_REQUIREMENTS_DOCUMENT.md`](docs/BUSINESS_REQUIREMENTS_DOCUMENT.md)** (BRD v4)
 
 ---
 
-## 📦 Getting Started
+## Tech stack (this repository)
+
+* **Framework:** [Next.js](https://nextjs.org/) 16 (App Router), React 19, TypeScript  
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/) 4  
+* **Linting:** ESLint (flat config: `eslint.config.mjs`)  
+* **Paths:** `@/*` → `./src/*` (see `tsconfig.json`)
+
+See [`AGENTS.md`](AGENTS.md) for dev commands and Cursor/cloud notes. Persistence, auth implementation, and other backend choices will evolve with the product—refer to the BRD and upcoming architecture docs.
+
+---
+
+## Getting started
 
 ```bash
-# Clone the repo
 git clone https://github.com/cogniversity/sproutly.git
-
-# Navigate into the project
 cd sproutly
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
----
-
-## 🧪 Roadmap
-
-* [ ] AI-assisted roadmap suggestions
-* [ ] Team workload balancing
-* [ ] Release prediction insights
-* [ ] Integrations (GitHub, Jira, Slack)
-* [ ] Real-time collaboration
+The app serves at [http://localhost:3000](http://localhost:3000). Use `npm run lint` and `npm run build` before shipping changes.
 
 ---
 
-## 🤝 Contributing
+## Roadmap (high level)
 
-Contributions are welcome! 🌿
-Feel free to open issues, suggest features, or submit pull requests.
+Aligned with the BRD; delivery is phased—not a promise of ship order or dates.
+
+* Core **Plots**, **Sprouts**, horizons, and lifecycle states  
+* **Initiatives** (cross-Plot) and **Harvests** (releases)  
+* **Leadership status** views and **status digest** (preview → SMTP later)  
+* **AI elaboration** (admin-configured provider; OpenAI, Claude, or Gemini behind the scenes)  
+* **Email templates** (authoring + preview)  
+* **Integrations** (e.g. GitHub, Jira, Slack)—depth phased  
+* **SSO / SAML** (post–first-phase identity, per BRD)  
+* Deeper real-time collaboration where it adds clear value  
 
 ---
 
-## 📄 License
+## Contributing
+
+Issues and pull requests are welcome.
+
+---
+
+## License
 
 MIT License
 
 ---
 
-## 🌱 Final Thought
-
-Sproutly isn’t just about managing work—
-it’s about **growing products with intention**.
-
----
+Sproutly isn’t just about managing work—it’s about **growing products with intention**.
