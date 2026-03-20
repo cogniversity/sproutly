@@ -65,6 +65,7 @@
 | workspaceId | FK → Workspace | |
 | name | string | |
 | description | string? | |
+| timelineLabel | string? | e.g. Q3'27; horizon bucket derived in app |
 | sortOrder | int default 0 | |
 | createdAt | datetime | |
 | updatedAt | datetime | |
@@ -80,15 +81,16 @@
 | title | string | |
 | description | string? | |
 | status | enum | see below |
-| horizon | enum | optional planning |
+| timelineLabel | string? | e.g. Q1'28 |
+| targetCompletionAt | datetime? | optional concrete target date |
 | ownerUserId | FK → User? | nullable |
 | createdAt | datetime | |
 | updatedAt | datetime | |
 
 **Status enum (MVP):** `BACKLOG`, `IN_PROGRESS`, `PAUSED`, `DEPRIORITIZED`, `BLOCKED`, `DONE`  
-**Horizon enum:** `NONE`, `DAY`, `WEEK`, `MONTH`, `QUARTER`, `YEAR` — typo MONTH as MONTH in prisma `MONTH`
+**Planning:** no fixed horizon enum; `timelineLabel` + `targetCompletionAt` drive a **derived** bucket (day/week/quarter/year) in the UI.
 
-**Index:** `(plotId)`, `(ownerUserId)`
+**Index:** `(plotId)`, `(ownerUserId)`, `(targetCompletionAt)`
 
 ---
 
@@ -100,7 +102,7 @@
 
 ### `Initiative`, `InitiativePlot`, `InitiativeSprout`
 
-Cross-plot programs; M2M to `Plot` and `Sprout`. Optional `driUserId` → `User`.
+Cross-plot programs; M2M to `Plot` and `Sprout`. Optional `driUserId` → `User`. Optional `timelineLabel`, `targetCompletionAt`, `startDate`, `endDate`.
 
 ### `Harvest`, `HarvestSprout`
 
@@ -128,3 +130,4 @@ Implemented in `prisma/schema.prisma` (source of truth after generation).
 |------|--------|
 | 2026-03-20 | MVP tables for auth + plots + sprouts |
 | 2026-03-20 | **PostgreSQL** datasource; Initiatives, Harvests, `WorkspaceAiSettings`, `EmailTemplate`; Sprout `parentSproutId`; session **tokenHash** |
+| 2026-03-21 | Replaced Sprout `horizon` enum with `timelineLabel` + `targetCompletionAt`; Plot `timelineLabel`; Initiative planning fields |

@@ -3,6 +3,7 @@ import {
   canEditWorkspace,
   canReadWorkspace,
 } from "@/lib/authz";
+import { optDate } from "@/lib/date-parse";
 import { jsonError } from "@/lib/http";
 import * as plots from "@/lib/services/plots";
 import * as sprouts from "@/lib/services/sprouts";
@@ -49,14 +50,16 @@ export async function POST(
   const parsed = createSproutBodySchema.safeParse(body);
   if (!parsed.success) return jsonError("Invalid request", 400);
 
+  const { targetCompletionAt, ...rest } = parsed.data;
   const sprout = await sprouts.createSprout({
     plotId,
-    parentSproutId: parsed.data.parentSproutId,
-    title: parsed.data.title,
-    description: parsed.data.description,
-    status: parsed.data.status,
-    horizon: parsed.data.horizon,
-    ownerUserId: parsed.data.ownerUserId,
+    parentSproutId: rest.parentSproutId,
+    title: rest.title,
+    description: rest.description,
+    status: rest.status,
+    timelineLabel: rest.timelineLabel,
+    targetCompletionAt: optDate(targetCompletionAt ?? undefined),
+    ownerUserId: rest.ownerUserId,
   });
   return Response.json({ sprout }, { status: 201 });
 }

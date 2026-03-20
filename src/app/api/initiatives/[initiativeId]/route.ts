@@ -47,11 +47,14 @@ export async function PATCH(
   const parsed = patchInitiativeBodySchema.safeParse(body);
   if (!parsed.success) return jsonError("Invalid request", 400);
 
-  const { startDate, endDate, ...rest } = parsed.data;
+  const { startDate, endDate, targetCompletionAt, ...rest } = parsed.data;
   const updated = await initiatives.updateInitiative(initiativeId, {
     ...rest,
     ...(startDate !== undefined ? { startDate: optDate(startDate) } : {}),
     ...(endDate !== undefined ? { endDate: optDate(endDate) } : {}),
+    ...(targetCompletionAt !== undefined
+      ? { targetCompletionAt: optDate(targetCompletionAt) }
+      : {}),
   });
   return Response.json({ initiative: updated });
 }

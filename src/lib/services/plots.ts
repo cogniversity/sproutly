@@ -12,12 +12,14 @@ export async function createPlot(input: {
   workspaceId: string;
   name: string;
   description?: string | null;
+  timelineLabel?: string | null;
 }): Promise<Plot> {
   return prisma.plot.create({
     data: {
       workspaceId: input.workspaceId,
       name: input.name,
       description: input.description ?? null,
+      timelineLabel: input.timelineLabel ?? null,
     },
   });
 }
@@ -31,7 +33,12 @@ export async function getPlotById(plotId: string) {
 
 export async function updatePlot(
   plotId: string,
-  data: { name?: string; description?: string | null; sortOrder?: number },
+  data: {
+    name?: string;
+    description?: string | null;
+    timelineLabel?: string | null;
+    sortOrder?: number;
+  },
 ) {
   return prisma.plot.update({
     where: { id: plotId },

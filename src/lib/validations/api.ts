@@ -14,11 +14,13 @@ export const loginBodySchema = z.object({
 export const createPlotBodySchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(4000).optional().nullable(),
+  timelineLabel: z.string().max(80).optional().nullable(),
 });
 
 export const patchPlotBodySchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(4000).optional().nullable(),
+  timelineLabel: z.string().max(80).optional().nullable(),
   sortOrder: z.number().int().optional(),
 });
 
@@ -31,13 +33,12 @@ const sproutStatus = z.enum([
   "DONE",
 ]);
 
-const horizon = z.enum(["NONE", "DAY", "WEEK", "MONTH", "QUARTER", "YEAR"]);
-
 export const createSproutBodySchema = z.object({
   title: z.string().min(1).max(300),
   description: z.string().max(8000).optional().nullable(),
   status: sproutStatus.optional(),
-  horizon: horizon.optional(),
+  timelineLabel: z.string().max(80).optional().nullable(),
+  targetCompletionAt: z.string().max(40).optional().nullable(),
   ownerUserId: z.string().min(1).max(40).optional().nullable(),
   parentSproutId: z.string().min(1).max(40).optional().nullable(),
 });
@@ -46,7 +47,8 @@ export const patchSproutBodySchema = z.object({
   title: z.string().min(1).max(300).optional(),
   description: z.string().max(8000).optional().nullable(),
   status: sproutStatus.optional(),
-  horizon: horizon.optional(),
+  timelineLabel: z.string().max(80).optional().nullable(),
+  targetCompletionAt: z.string().max(40).optional().nullable(),
   ownerUserId: z.string().min(1).max(40).optional().nullable(),
 });
 
@@ -68,6 +70,8 @@ export const createInitiativeBodySchema = z.object({
   driUserId: z.string().min(1).max(40).optional().nullable(),
   startDate: z.string().max(40).optional().nullable(),
   endDate: z.string().max(40).optional().nullable(),
+  timelineLabel: z.string().max(80).optional().nullable(),
+  targetCompletionAt: z.string().max(40).optional().nullable(),
 });
 
 export const patchInitiativeBodySchema = z.object({
@@ -76,6 +80,15 @@ export const patchInitiativeBodySchema = z.object({
   driUserId: z.string().min(1).max(40).optional().nullable(),
   startDate: z.string().max(40).optional().nullable(),
   endDate: z.string().max(40).optional().nullable(),
+  timelineLabel: z.string().max(80).optional().nullable(),
+  targetCompletionAt: z.string().max(40).optional().nullable(),
+});
+
+export const aiEnrichBodySchema = z.object({
+  entity: z.enum(["plot", "sprout", "initiative"]),
+  title: z.string().min(1).max(300),
+  description: z.string().max(8000).optional().nullable(),
+  plotName: z.string().max(200).optional().nullable(),
 });
 
 export const linkPlotBodySchema = z.object({

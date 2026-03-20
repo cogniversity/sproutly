@@ -1,5 +1,3 @@
-import type { LlmProvider } from "@prisma/client";
-
 export type ElaborationSuggestion = { title: string; description?: string };
 
 const SYSTEM = `You are a product/engineering planning assistant. Given a feature or task title (and optional description), respond with ONLY valid JSON: {"suggestions":[{"title":"string","description":"optional short string"}]} with 3-8 concrete, actionable sub-items. No markdown, no prose outside JSON.`;
@@ -8,8 +6,9 @@ export async function elaborateWithOpenAI(input: {
   apiKey: string;
   sproutTitle: string;
   sproutDescription?: string | null;
+  plotName?: string;
 }): Promise<ElaborationSuggestion[]> {
-  const user = `Title: ${input.sproutTitle}\nDescription: ${input.sproutDescription ?? "(none)"}`;
+  const user = `Plot / product: ${input.plotName ?? "(unknown)"}\nTitle: ${input.sproutTitle}\nDescription: ${input.sproutDescription ?? "(none)"}`;
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -44,15 +43,3 @@ export async function elaborateWithOpenAI(input: {
   );
 }
 
-export function providerLabel(p: LlmProvider): string {
-  switch (p) {
-    case "OPENAI":
-      return "OpenAI";
-    case "ANTHROPIC":
-      return "Anthropic";
-    case "GOOGLE":
-      return "Google";
-    default:
-      return "LLM";
-  }
-}

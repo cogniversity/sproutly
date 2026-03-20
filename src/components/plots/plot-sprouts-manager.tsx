@@ -1,8 +1,10 @@
 "use client";
 
-import type { Horizon, Sprout, SproutStatus, User } from "@prisma/client";
+import type { Sprout, SproutStatus, User } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AiSuggestButton } from "@/components/ai/ai-suggest-button";
+import { formatPlanningLine } from "@/lib/timeline";
 
 export type SproutRow = Sprout & {
   owner: Pick<User, "id" | "name" | "email"> | null;
@@ -17,18 +19,23 @@ const STATUSES: SproutStatus[] = [
   "DONE",
 ];
 
-const HORIZONS: Horizon[] = ["NONE", "DAY", "WEEK", "MONTH", "QUARTER", "YEAR"];
-
 export function PlotSproutsManager({
   plotId,
+  workspaceId,
+  plotName,
   initialSprouts,
 }: {
   plotId: string;
+  workspaceId: string;
+  plotName: string;
   initialSprouts: SproutRow[];
 }) {
   const router = useRouter();
   const [sprouts, setSprouts] = useState(initialSprouts);
   const [title, setTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newTimeline, setNewTimeline] = useState("");
+  const [newTarget, setNewTarget] = useState("");
   const [aiPreview, setAiPreview] = useState<{
     sproutId: string;
     suggestions: { title: string; description?: string }[];
@@ -41,16 +48,30 @@ export function PlotSproutsManager({
     const res = await fetch(`/api/plots/${plotId}/sprouts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: title.trim() }),
+      body: JSON.stringify({
+        title: title.trim(),
+        description: newDescription.trim() || null,
+        timelineLabel: newTimeline.trim() || null,
+        targetCompletionAt: newTarget.trim() || null,
+      }),
     });
     if (!res.ok) return;
     const data = (await res.json()) as { sprout: SproutRow };
     setSprouts((s) => [data.sprout, ...s]);
     setTitle("");
+    setNewDescription("");
+    setNewTimeline("");
+    setNewTarget("");
     router.refresh();
   }
 
-  async function patchSprout(id: string, patch: Partial<{ status: SproutStatus; horizon: Horizon }>) {
+  async function patchSprout(
+    id: string,
+    patch: Record<
+      string,
+      string | SproutStatus | null | undefined
+    >,
+  ) {
     const res = await fetch(`/api/sprouts/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -83,9 +104,10 @@ export function PlotSproutsManager({
         suggestions?: { title: string; description?: string }[];
         created?: SproutRow[];
         error?: string;
+        hint?: string;
       };
       if (!res.ok) {
-        alert(data.error ?? "AI assist unavailable.");
+        alert([data.error, data.hint].filter(Boolean).join("\n\n"));
         return;
       }
       if (create && data.created?.length) {
@@ -104,34 +126,72 @@ export function PlotSproutsManager({
 
   return (
     <div className="flex flex-col gap-8">
-      <form onSubmit={createSprout} className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="sprout-title" className="text-sm font-medium">
-            New sprout
-          </label>
+      <form onSubmit={createSprout} className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-sm font-semibold">New sprout</h2>
+          <AiSuggestButton
+            workspaceId={workspaceId}
+            entity="sprout"
+            title={title}
+            description={newDescription}
+            plotName={plotName}
+            onResult={(d) => {
+              if (typeof d.description === "string") setNewDescription(d.description);
+              if (typeof d.timelineLabel === "string") setNewTimeline(d.timelineLabel);
+              if (d.targetCompletionAt === null || typeof d.targetCompletionAt === "string") {
+                setNewTarget(
+                  d.targetCompletionAt
+                    ? String(d.targetCompletionAt).slice(0, 10)
+                    : "",
+                );
+              }
+            }}
+          />
+        </div>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title (required)"
+          className="rounded-lg border border-zinc-300 px-3 py-2 dark:border-zinc-600"
+          required
+        />
+        <textarea
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          placeholder="Description (optional)"
+          rows={2}
+          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
+        />
+        <div className="flex flex-wrap gap-3">
           <input
-            id="sprout-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Feature or task title"
-            className="min-w-[280px] rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+            value={newTimeline}
+            onChange={(e) => setNewTimeline(e.target.value)}
+            placeholder="Timeline e.g. Q1'28"
+            className="min-w-[160px] flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
+          />
+          <input
+            type="date"
+            value={newTarget}
+            onChange={(e) => setNewTarget(e.target.value)}
+            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
           />
         </div>
         <button
           type="submit"
-          className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+          className="w-fit rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white"
         >
           Add sprout
         </button>
       </form>
 
       <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
-        <table className="w-full min-w-[640px] text-left text-sm">
+        <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/50">
             <tr>
               <th className="px-3 py-2 font-medium">Title</th>
               <th className="px-3 py-2 font-medium">Status</th>
-              <th className="px-3 py-2 font-medium">Horizon</th>
+              <th className="px-3 py-2 font-medium">Planning</th>
+              <th className="px-3 py-2 font-medium">Derived</th>
               <th className="px-3 py-2 font-medium">Owner</th>
               <th className="px-3 py-2 font-medium">AI</th>
               <th className="px-3 py-2 font-medium" />
@@ -140,91 +200,21 @@ export function PlotSproutsManager({
           <tbody>
             {sprouts.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-zinc-500">
+                <td colSpan={7} className="px-3 py-6 text-zinc-500">
                   No Sprouts in this plot yet.
                 </td>
               </tr>
             ) : (
               sprouts.map((s) => (
-                <tr
-                  key={s.id}
-                  className="border-b border-zinc-100 dark:border-zinc-800"
-                >
-                  <td className="px-3 py-2 font-medium">
-                    {s.parentSproutId ? (
-                      <span className="text-zinc-400">↳ </span>
-                    ) : null}
-                    {s.title}
-                  </td>
-                  <td className="px-3 py-2">
-                    <select
-                      value={s.status}
-                      onChange={(e) =>
-                        void patchSprout(s.id, {
-                          status: e.target.value as SproutStatus,
-                        })
-                      }
-                      className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
-                    >
-                      {STATUSES.map((st) => (
-                        <option key={st} value={st}>
-                          {st.replace(/_/g, " ")}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-3 py-2">
-                    <select
-                      value={s.horizon}
-                      onChange={(e) =>
-                        void patchSprout(s.id, {
-                          horizon: e.target.value as Horizon,
-                        })
-                      }
-                      className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
-                    >
-                      {HORIZONS.map((h) => (
-                        <option key={h} value={h}>
-                          {h === "NONE" ? "—" : h}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-3 py-2 text-zinc-600 dark:text-zinc-400">
-                    {s.owner?.name ?? "—"}
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-col gap-1">
-                      <button
-                        type="button"
-                        disabled={aiBusy === s.id}
-                        onClick={() => void elaborate(s.id, false)}
-                        className="text-left text-xs text-emerald-700 underline disabled:opacity-50 dark:text-emerald-400"
-                      >
-                        {aiBusy === s.id ? "…" : "Suggest tasks"}
-                      </button>
-                      {aiPreview?.sproutId === s.id ? (
-                        <button
-                          type="button"
-                          disabled={aiBusy === s.id}
-                          onClick={() => void elaborate(s.id, true)}
-                          className="text-left text-xs font-medium text-emerald-800 dark:text-emerald-300"
-                        >
-                          Create as sub-sprouts
-                        </button>
-                      ) : null}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <button
-                      type="button"
-                      onClick={() => void removeSprout(s.id)}
-                      className="text-xs text-red-600 hover:underline dark:text-red-400"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+                <SproutRowFields
+                  key={`${s.id}-${s.updatedAt.toString()}`}
+                  s={s}
+                  aiBusy={aiBusy}
+                  aiPreview={aiPreview}
+                  onPatch={patchSprout}
+                  onRemove={removeSprout}
+                  onElaborate={elaborate}
+                />
               ))
             )}
           </tbody>
@@ -251,5 +241,132 @@ export function PlotSproutsManager({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function SproutRowFields({
+  s,
+  aiBusy,
+  aiPreview,
+  onPatch,
+  onRemove,
+  onElaborate,
+}: {
+  s: SproutRow;
+  aiBusy: string | null;
+  aiPreview: { sproutId: string; suggestions: unknown[] } | null;
+  onPatch: (
+    id: string,
+    p: Record<string, string | SproutStatus | null | undefined>,
+  ) => void | Promise<void>;
+  onRemove: (id: string) => void;
+  onElaborate: (id: string, create: boolean) => void;
+}) {
+  const dateStr = s.targetCompletionAt
+    ? new Date(s.targetCompletionAt).toISOString().slice(0, 10)
+    : "";
+
+  return (
+    <tr className="border-b border-zinc-100 dark:border-zinc-800">
+      <td className="px-3 py-2 align-top font-medium">
+        {s.parentSproutId ? <span className="text-zinc-400">↳ </span> : null}
+        <input
+          defaultValue={s.title}
+          onBlur={(e) => {
+            const v = e.target.value.trim();
+            if (v && v !== s.title) void onPatch(s.id, { title: v });
+          }}
+          className="w-full rounded border border-transparent px-1 py-0.5 font-medium hover:border-zinc-200 dark:hover:border-zinc-700"
+        />
+        <textarea
+          defaultValue={s.description ?? ""}
+          placeholder="Description"
+          rows={2}
+          onBlur={(e) => {
+            const v = e.target.value.trim();
+            const next = v || null;
+            if (next !== (s.description ?? null)) void onPatch(s.id, { description: next });
+          }}
+          className="mt-1 w-full resize-y rounded border border-transparent px-1 py-0.5 text-xs font-normal text-zinc-600 hover:border-zinc-200 dark:text-zinc-400 dark:hover:border-zinc-700"
+        />
+      </td>
+      <td className="px-3 py-2 align-top">
+        <select
+          value={s.status}
+          onChange={(e) =>
+            void onPatch(s.id, { status: e.target.value as SproutStatus })
+          }
+          className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
+        >
+          {STATUSES.map((st) => (
+            <option key={st} value={st}>
+              {st.replace(/_/g, " ")}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-3 py-2 align-top">
+        <input
+          defaultValue={s.timelineLabel ?? ""}
+          placeholder="Q3'27"
+          onBlur={(e) =>
+            void onPatch(s.id, {
+              timelineLabel: e.target.value.trim() || null,
+            })
+          }
+          className="mb-1 w-full rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-600"
+        />
+        <input
+          type="date"
+          defaultValue={dateStr}
+          onBlur={(e) =>
+            void onPatch(s.id, {
+              targetCompletionAt: e.target.value.trim() || null,
+            })
+          }
+          className="w-full rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-600"
+        />
+      </td>
+      <td className="px-3 py-2 align-top text-xs text-zinc-500">
+        {formatPlanningLine(
+          s.targetCompletionAt ? new Date(s.targetCompletionAt) : null,
+          s.timelineLabel,
+        )}
+      </td>
+      <td className="px-3 py-2 align-top text-zinc-600 dark:text-zinc-400">
+        {s.owner?.name ?? "—"}
+      </td>
+      <td className="px-3 py-2 align-top">
+        <div className="flex flex-col gap-1">
+          <button
+            type="button"
+            disabled={aiBusy === s.id}
+            onClick={() => void onElaborate(s.id, false)}
+            className="text-left text-xs text-emerald-700 underline disabled:opacity-50 dark:text-emerald-400"
+          >
+            {aiBusy === s.id ? "…" : "Suggest tasks"}
+          </button>
+          {aiPreview?.sproutId === s.id ? (
+            <button
+              type="button"
+              disabled={aiBusy === s.id}
+              onClick={() => void onElaborate(s.id, true)}
+              className="text-left text-xs font-medium text-emerald-800 dark:text-emerald-300"
+            >
+              Create sub-sprouts
+            </button>
+          ) : null}
+        </div>
+      </td>
+      <td className="px-3 py-2 align-top text-right">
+        <button
+          type="button"
+          onClick={() => void onRemove(s.id)}
+          className="text-xs text-red-600 dark:text-red-400"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
   );
 }

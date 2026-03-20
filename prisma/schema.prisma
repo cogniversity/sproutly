@@ -22,15 +22,6 @@ enum SproutStatus {
   DONE
 }
 
-enum Horizon {
-  NONE
-  DAY
-  WEEK
-  MONTH
-  QUARTER
-  YEAR
-}
-
 enum LlmProvider {
   OPENAI
   ANTHROPIC
@@ -93,57 +84,63 @@ model Membership {
 }
 
 model Plot {
-  id          String    @id @default(cuid())
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  sortOrder   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  sprouts     Sprout[]
+  id             String    @id @default(cuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  /// Planning label e.g. Q3'27 — horizon bucket is derived in app from this + dates.
+  timelineLabel  String?
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  sprouts        Sprout[]
   initiativePlots InitiativePlot[]
 
   @@index([workspaceId])
 }
 
 model Sprout {
-  id             String       @id @default(cuid())
-  plotId         String
-  plot           Plot         @relation(fields: [plotId], references: [id], onDelete: Cascade)
-  parentSproutId String?
-  parent         Sprout?      @relation("SproutTree", fields: [parentSproutId], references: [id], onDelete: SetNull)
-  children       Sprout[]     @relation("SproutTree")
-  title          String
-  description    String?
-  status         SproutStatus @default(BACKLOG)
-  horizon        Horizon      @default(NONE)
-  ownerUserId    String?
-  owner          User?        @relation("SproutOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  initiativeSprouts InitiativeSprout[]
-  harvestSprouts HarvestSprout[]
+  id                  String       @id @default(cuid())
+  plotId              String
+  plot                Plot         @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  parentSproutId      String?
+  parent              Sprout?      @relation("SproutTree", fields: [parentSproutId], references: [id], onDelete: SetNull)
+  children            Sprout[]     @relation("SproutTree")
+  title               String
+  description         String?
+  status              SproutStatus @default(BACKLOG)
+  timelineLabel       String?
+  targetCompletionAt  DateTime?
+  ownerUserId         String?
+  owner               User?        @relation("SproutOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  initiativeSprouts   InitiativeSprout[]
+  harvestSprouts      HarvestSprout[]
 
   @@index([plotId])
   @@index([ownerUserId])
   @@index([parentSproutId])
+  @@index([targetCompletionAt])
 }
 
 model Initiative {
-  id          String    @id @default(cuid())
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  driUserId   String?
-  dri         User?     @relation("InitiativeDri", fields: [driUserId], references: [id], onDelete: SetNull)
-  startDate   DateTime?
-  endDate     DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  plots       InitiativePlot[]
-  sprouts     InitiativeSprout[]
+  id                  String    @id @default(cuid())
+  workspaceId         String
+  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name                String
+  description         String?
+  driUserId           String?
+  dri                 User?     @relation("InitiativeDri", fields: [driUserId], references: [id], onDelete: SetNull)
+  startDate           DateTime?
+  endDate             DateTime?
+  timelineLabel       String?
+  targetCompletionAt  DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  plots               InitiativePlot[]
+  sprouts             InitiativeSprout[]
 
   @@index([workspaceId])
 }

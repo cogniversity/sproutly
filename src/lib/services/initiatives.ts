@@ -37,6 +37,8 @@ export async function createInitiative(input: {
   driUserId?: string | null;
   startDate?: Date | null;
   endDate?: Date | null;
+  timelineLabel?: string | null;
+  targetCompletionAt?: Date | null;
 }) {
   return prisma.initiative.create({
     data: {
@@ -46,6 +48,8 @@ export async function createInitiative(input: {
       driUserId: input.driUserId ?? null,
       startDate: input.startDate ?? null,
       endDate: input.endDate ?? null,
+      timelineLabel: input.timelineLabel ?? null,
+      targetCompletionAt: input.targetCompletionAt ?? null,
     },
     include: {
       dri: { select: { id: true, name: true, email: true } },
@@ -63,6 +67,8 @@ export async function updateInitiative(
     driUserId?: string | null;
     startDate?: Date | null;
     endDate?: Date | null;
+    timelineLabel?: string | null;
+    targetCompletionAt?: Date | null;
   },
 ) {
   return prisma.initiative.update({

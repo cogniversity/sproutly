@@ -45,6 +45,7 @@ export async function POST(
     workspaceId,
     name: parsed.data.name,
     description: parsed.data.description,
+    timelineLabel: parsed.data.timelineLabel,
   });
   return Response.json({ plot }, { status: 201 });
 }

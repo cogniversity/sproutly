@@ -143,7 +143,8 @@ function AiSettingsPanel({ workspaceId }: { workspaceId: string }) {
     <form onSubmit={save} className="flex max-w-lg flex-col gap-4">
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Editors see only generic “AI assist.” Provider and keys stay on this screen.
-        Elaboration uses <strong>OpenAI</strong> in this build when enabled.
+        Elaboration uses <strong>OpenAI</strong> in this build. Saving a non-empty API key
+        automatically turns AI on unless you explicitly uncheck “Enable” in the same save.
       </p>
       <label className="flex items-center gap-2 text-sm">
         <input

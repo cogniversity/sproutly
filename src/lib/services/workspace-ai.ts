@@ -18,7 +18,13 @@ export async function patchAiSettings(input: {
     where: { workspaceId: input.workspaceId },
   });
 
-  const nextEnabled = input.enabled ?? existing?.enabled ?? false;
+  let mergedEnabled = existing?.enabled ?? false;
+  if (input.enabled !== undefined) {
+    mergedEnabled = input.enabled;
+  } else if (input.apiKey != null && input.apiKey.trim()) {
+    mergedEnabled = true;
+  }
+
   const nextProvider =
     input.provider !== undefined ? input.provider : existing?.provider ?? null;
   let nextKey = existing?.apiKey ?? null;
@@ -26,18 +32,21 @@ export async function patchAiSettings(input: {
     nextKey = input.apiKey?.trim() ? input.apiKey.trim() : null;
   }
 
+  const touchesAuth =
+    input.enabled !== undefined || input.apiKey !== undefined;
+
   return prisma.workspaceAiSettings.upsert({
     where: { workspaceId: input.workspaceId },
     create: {
       workspaceId: input.workspaceId,
-      enabled: nextEnabled,
+      enabled: mergedEnabled,
       provider: nextProvider,
       apiKey: nextKey,
     },
     update: {
-      ...(input.enabled !== undefined ? { enabled: input.enabled } : {}),
-      ...(input.provider !== undefined ? { provider: input.provider } : {}),
+      ...(touchesAuth ? { enabled: mergedEnabled } : {}),
       ...(input.apiKey !== undefined ? { apiKey: nextKey } : {}),
+      ...(input.provider !== undefined ? { provider: input.provider } : {}),
     },
   });
 }
@@ -54,10 +63,10 @@ export async function resolveLlmApiKey(workspaceId: string): Promise<{
   provider: LlmProvider;
 } | null> {
   const ws = await getAiSettings(workspaceId);
-  if (ws && !ws.enabled) {
+  if (ws && ws.enabled === false) {
     return null;
   }
-  if (ws?.enabled && ws.apiKey?.trim() && ws.provider === "OPENAI") {
+  if (ws?.apiKey?.trim() && ws.provider === "OPENAI") {
     return { apiKey: ws.apiKey, provider: "OPENAI" };
   }
   const fallback = process.env.OPENAI_API_KEY?.trim();
