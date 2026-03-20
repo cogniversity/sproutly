@@ -2,6 +2,16 @@
 
 Use this skill when the user asks for a **Business Requirements Document (BRD)**, **product spec**, **feature brief**, **MVP scope**, or similar. The goal is **execution-ready clarity** for startup teams—not enterprise paperwork.
 
+## Pipeline position
+
+| | |
+|--|--|
+| **Runs after** | Product intent, stakeholder prompts, or discovery notes (informal input is fine). |
+| **Feeds** | [`brd-engineering-decomposition.md`](brd-engineering-decomposition.md) — needs a clear **scope** and **acceptance** story. |
+| **Primary output** | BRD sections per this skill (problem, metrics, scope, stories, NFRs, risks, milestones as **ordering themes**—not calendar commitments when agents own downstream steps). |
+
+When **specialized agents** own each downstream skill, prioritize **decision clarity** over schedule detail in the BRD.
+
 ---
 
 ## Principles

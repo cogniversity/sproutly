@@ -4,13 +4,23 @@ Use this skill when the user provides **system architecture**, a **relational sc
 
 **Goal**: **Setup → core vertical slices → enhancements**, with **actionable tasks**, explicit **dependencies**, **build order**, **API/DB sequencing**, and **environment** guidance—aligned to the architecture and schema (no orphan work, no vague “implement logic” blobs).
 
+## Pipeline position
+
+| | |
+|--|--|
+| **Runs after** | [`decomposition-to-system-architecture.md`](decomposition-to-system-architecture.md) **and** [`architecture-to-relational-schema.md`](architecture-to-relational-schema.md). |
+| **Feeds** | [`structured-task-to-production-code.md`](structured-task-to-production-code.md) — **one task (or parallel independent tasks) per agent run**. |
+| **Primary output** | Phased plan, **global build order**, folder layout, API/DB order, env, risks, MVP vs deferred. |
+
+**Agent-oriented sequencing**: Prefer **dependency-correct order** and **contract-before-parallel** work over **calendar estimates**.
+
 ---
 
 ## Principles
 
 - **MVP first**: Ship a **thin end-to-end path** early (auth stub → one core journey → observability baseline). Defer polish, nice-to-have endpoints, and premature scale work—list deferrals explicitly.
 - **Actionable tasks**: Each task has a **verifiable output** (merged PR state, command result, demo path). Ban titles like “Implement feature logic,” “Work on API,” “Hook up UI.”
-- **Right-sized work**: Prefer **0.5–2 day** slices for one engineer; split when parallelization or risk (unknown integration) demands it.
+- **Right-sized work**: Match **S/M/L** semantics from [`brd-engineering-decomposition.md`](brd-engineering-decomposition.md)—each plan task is **one shippable step** for an implementation agent; split when parallelization or unknown integration risk demands it.
 - **Alignment**: Every phase/task **maps** to architecture components, schema tables, and (if present) feature/epic IDs or names.
 - **Fast feedback**: Order work so **integration and E2E smoke** happen **early** (contract tests, seed data, local docker compose if applicable).
 - **Bullets over essays**: Tables and lists; short “why this order” rationale per phase.
@@ -47,14 +57,14 @@ Ask **targeted** questions or ship **v1 plan + Assumptions**:
 
 ---
 
-## Adaptation: timeline
+## Adaptation: scope pressure (not calendar)
 
-| Constraint | Behavior |
-|------------|----------|
-| **Aggressive MVP** | Collapse phases; **stub** integrations (fake adapter + interface); fewer indexes until load known. |
-| **Fixed launch** | Call out **critical path**; move non-path items to **Post-MVP** with dependencies noted. |
+| Mode | Behavior |
+|------|----------|
+| **Tight MVP** | Collapse phases; **stub** integrations (fake adapter + interface); defer nonessential indexes until query paths are proven. |
+| **Full breadth** | Keep phases distinct; include hardening, observability, and migration tasks implied by the BRD—still ordered by **dependencies**. |
 
-State at top: `**Plan mode:** MVP | Standard | Compressed` and `**Assumed team size:** …` (or TBD).
+State at top: `**Plan mode:** MVP | Standard | Full breadth` and `**Assumed team size:** …` (or TBD). **Dates are optional**; **critical path** = tasks that **block downstream agents** or integration, not calendar deadlines.
 
 ---
 
@@ -92,7 +102,7 @@ Adjust labels to match the product; **do not skip** explicit MVP deferrals (see 
 ### 2. Recommended build order
 
 - **Step-by-step** numbered list of **task titles** across phases (single total order).
-- **Critical path**: Mark tasks that **delay launch** if late (e.g., `CP`).
+- **Critical path**: Mark tasks that **block** later phases or parallel agents if unfinished (e.g., `CP`).
 - **Parallelizable**: Group tasks safe to run **concurrently** after named dependency (e.g., “After `OpenAPI v1 for plots` lands: FE list view ∥ BE pagination tests”).
 
 ### 3. Folder / project structure
@@ -134,7 +144,7 @@ Keep depth **reasonable**; note **one** sentence per top-level folder.
 
 - **Strict MVP**: Bullets—what **must** ship for first meaningful user/stakeholder demo.
 - **Deferred**: Bullets—**Post-MVP** with **why** and **dependency** on what MVP learning.
-- **Boundary**: One short paragraph: what **excludes** MVP to protect schedule.
+- **Boundary**: One short paragraph: what **excludes** MVP to protect **scope** and **sequencing clarity**.
 
 ---
 

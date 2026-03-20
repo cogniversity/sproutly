@@ -4,6 +4,14 @@ Use this skill when the user provides **structured product decomposition**—**F
 
 **Goal**: Bridge **product intent** and **engineering execution**: named boundaries, explicit interactions, and an API/data story that **covers every feature** in the input (no silent drops).
 
+## Pipeline position
+
+| | |
+|--|--|
+| **Runs after** | [`brd-engineering-decomposition.md`](brd-engineering-decomposition.md) (Features / Epics / Tasks). |
+| **Feeds** | [`architecture-to-relational-schema.md`](architecture-to-relational-schema.md) and [`architecture-to-execution-plan.md`](architecture-to-execution-plan.md). |
+| **Primary output** | System design + **API endpoint table** + data flows; optional **API contract artifact** for downstream agents (see §4). |
+
 ---
 
 ## Principles
@@ -80,6 +88,13 @@ Provide a **table** of endpoints (no wall of prose):
 - **Idempotency**, pagination, and error shape—mention where non-trivial (brief).
 
 **Separation of concerns**: One bullet line per layer—router → validation → handler → service → repository—where applicable.
+
+**API contract handoff (for later agents)** — when APIs are non-trivial, add **one** of:
+
+- **OpenAPI 3** fragment (`paths` + shared `components/schemas`) consistent with the endpoint table, **or**
+- **Per-route** request/response **field lists** + **HTTP status** matrix (minimum bar if OpenAPI is skipped).
+
+Implementation agents ([`structured-task-to-production-code.md`](structured-task-to-production-code.md)) and schema agents should treat this as the **default contract** unless the user overrides it.
 
 ### 5. Data Flow
 

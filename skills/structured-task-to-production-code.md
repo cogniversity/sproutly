@@ -4,6 +4,14 @@ Use this skill when the user supplies a **specific engineering task** plus **arc
 
 **Goal**: Turn a well-scoped task into **working, integrated** implementation: **backend**, **frontend**, **database** (Prisma/migrations/SQL), and **integrations**—with **TypeScript type safety**, **basic error handling**, and **security-aware validation** where applicable.
 
+## Pipeline position
+
+| | |
+|--|--|
+| **Runs after** | [`architecture-to-execution-plan.md`](architecture-to-execution-plan.md) task pick + [`decomposition-to-system-architecture.md`](decomposition-to-system-architecture.md) + [`architecture-to-relational-schema.md`](architecture-to-relational-schema.md) (+ **API contract** from architecture when present). |
+| **Feeds** | Review, QA, or deployment agents (outside this folder); **repo** is the source of truth after merge. |
+| **Primary output** | Code changes (path-scoped), matching **existing** project patterns. |
+
 ---
 
 ## Principles
