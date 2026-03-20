@@ -2,7 +2,7 @@
 
 **BRD level:** Product (full product vision — startups **and** enterprises building software; phased delivery is an implementation concern, not a scope ceiling)
 
-**Document status:** v2 — expanded market, cross-plot Initiatives, flexible planning model, Harvest as release hub, AI decomposition with OpenAI / Claude / Gemini.
+**Document status:** v3 — admin-only AI config (opaque to other users), **custom DB user management** (no SSO in current phase), **no dedicated reporting** product surface, **email templates + preview** (SMTP sending later).
 
 ---
 
@@ -14,11 +14,11 @@ Software organizations—whether startups or enterprises—struggle to keep **st
 
 ### Context
 
-Sproutly is a **product management platform** that connects execution with strategy using a growth metaphor (**Sprouts**, **Plots**, **Harvests**, **Growth Timeline**). Clients ship software; they need **flexible time horizons** (not mandatory scrum), **cross-cutting Initiatives**, **Harvests** as the anchor for **what releases together**, and optional **AI-assisted breakdown** of ideas and features into tasks—using **their choice of model provider** (OpenAI, Anthropic Claude, Google Gemini).
+Sproutly is a **product management platform** that connects execution with strategy using a growth metaphor (**Sprouts**, **Plots**, **Harvests**, **Growth Timeline**). Clients ship software; they need **flexible time horizons** (not mandatory scrum), **cross-cutting Initiatives**, **Harvests** as the anchor for **what releases together**, and optional **AI-assisted breakdown** of ideas and features into tasks. **Which LLM provider and API credentials apply** is configured **only by a client/workspace admin**; **other personas never see provider, model, or keys** (generic “AI assist” experience when enabled).
 
 ### Goal
 
-Provide **one system of record** where teams can: organize work by **Plot** (product/team/stream); model **Initiatives that span multiple Plots**; plan with **horizons and priorities that tolerate change**; track **releases via Harvests**; visualize **Growth Timelines**; and use **AI to elaborate** new ideas or features into detailed work items—**enterprise-ready** (auth, scale, governance) without forcing **small teams** into heavyweight process.
+Provide **one system of record** where teams can: organize work by **Plot** (product/team/stream); model **Initiatives that span multiple Plots**; plan with **horizons and priorities that tolerate change**; track **releases via Harvests**; visualize **Growth Timelines**; and use **AI to elaborate** new ideas or features into detailed work items—backed by **custom database–based users and roles** (no external IdP required in the current phase). **No separate reporting/analytics product** beyond normal **in-app lists, filters, and detail views**. **Email**: support **creating templates and previewing** rendered output now; **outbound delivery via SMTP (or similar) comes later**.
 
 ---
 
@@ -31,7 +31,7 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 | Release clarity | % of shipped Sprouts (or epics) associated with a **Harvest** when org policy requires it | TBD | Configurable target (e.g. ≥ 90%) | Per quarter | Product / CS |
 | Planning flexibility | User-reported fit: “Supports how we actually plan” (survey 1–5) | TBD | ≥ 4.0 | Rolling | Product |
 | AI usefulness | % of AI-assisted breakdown sessions where user **accepts or edits** ≥ 50% of generated tasks | TBD | ≥ TBD with PM | Post-launch AI | Product |
-| Enterprise readiness | SSO + RBAC available for enterprise tier; audit export | N/A | Feature-complete per FR | Contract-driven | Eng + Security |
+| Admin & access hygiene | Workspace admins can manage **DB-backed** users and roles; AI settings restricted to admin | N/A | Per FR-012 / FR-013 | Rolling | Eng + Security |
 
 *Baselines and numeric targets for AI/enterprise should be set with GTM and first design partners.*
 
@@ -60,12 +60,12 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 - **Pain:** Spreadsheets and side channels; no link to real product roadmaps.
 - **Uses Sproutly:** Cross-plot **Initiative** (e.g. “Acme onsite — Q2”), Sprouts per demo track, owners per Plot slice.
 
-### P4 — Morgan, IT / Security (enterprise)
+### P4 — Morgan, Workspace admin / IT (enterprise)
 
-- **Context:** Vendor assessment, SSO, data handling, AI usage policy.
-- **Goal:** SAML/OIDC, roles, audit, optional BYOK for AI.
-- **Pain:** Tools that only support one IdP or opaque AI data flow.
-- **Uses Sproutly:** Admin console, integration docs, AI provider + data-processing transparency.
+- **Context:** User lifecycle, roles, data handling, **which AI vendor/key the org uses** (procurement, policy).
+- **Goal:** Control **users in Sproutly’s database**, RBAC, and **AI configuration** without exposing keys or vendor choice to PMs/ICs.
+- **Pain:** Leaky settings UI; everyone sees API keys or model pickers.
+- **Uses Sproutly:** **Admin-only** settings: users, roles, **AI provider + key**, data-processing notes for LLM use. **Does not** expect end users to see provider branding in app copy (keep generic).
 
 ### P5 — Sam, Founder / Startup IC
 
@@ -86,8 +86,9 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 - As a **lead**, I want to **mark work as active, paused, or deprioritized** without deleting it, so that **priority churn is honest and history remains**.
 - As a **PM**, I want to **plan with horizons (not only sprints)**, so that **teams that don’t run strict sprints still get roadmap clarity**.
 - As a **release manager**, I want **Harvests to define what ships together**, so that **release tracking is explicit and communicable**.
-- As a **user**, I want to **choose OpenAI, Claude, or Gemini** (per org policy) **for AI breakdown**, so that **we comply with contracts and preferences**.
-- As an **admin**, I want **SSO and role-based access**, so that **enterprise rollout is supported**.
+- As a **workspace admin**, I want to **set the AI provider and API key for my organization**, so that **procurement and security stay centralized** and **no other users see vendor or secrets**.
+- As a **PM or IC**, I want to **run “Elaborate with AI”** when my admin has enabled it, so that **I get suggestions without needing to know or choose a model provider**.
+- As an **admin**, I want **database-backed users and roles**, so that **access is manageable without an external IdP in the first phase**.
 
 ### Use case: Customer visit — multi-product configured demo
 
@@ -106,7 +107,7 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 | **Actor** | Platform lead |
 | **Trigger** | e.g. data center move, K8s migration, shared auth upgrade |
 | **Main flow** | 1) Create Initiative → 2) Link affected Plots → 3) Create Sprouts for waves/milestones per product + shared platform tasks → 4) Associate coordinated **Harvest** (or Harvest **series**) for cutover windows → 5) Growth Timeline shows progression across the program |
-| **Acceptance** | Cross-Plot reporting; Harvest(es) show scope of coordinated release/cutover. |
+| **Acceptance** | Cross-Plot **visibility** in Initiative and Harvest views; Harvest(es) show scope of coordinated release/cutover. |
 
 ### Use case: New feature on existing product — AI task breakdown
 
@@ -114,14 +115,14 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 |------|-------------|
 | **Actor** | PM or tech lead |
 | **Trigger** | Feature approved at epic level; needs engineering tasks |
-| **Main flow** | 1) Sprout lives in correct Plot → 2) User opens “Elaborate with AI” → 3) Select provider (OpenAI / Claude / Gemini) per org config → 4) Review generated tasks/sub-Sprouts → 5) Accept, edit, or reject; audit trail stores prompt hash / model / timestamp per policy |
-| **Acceptance** | Output attaches to parent Sprout; permissions respected; no provider credentials in client logs. |
+| **Main flow** | 1) Sprout lives in correct Plot → 2) User opens “Elaborate with AI” (only if admin enabled AI) → 3) **No provider picker**—server uses admin-configured provider/key → 4) Review generated tasks/sub-Sprouts → 5) Accept, edit, or reject; audit trail stores prompt hash / model / timestamp **for admin/compliance** (non-admins do not see vendor details in UI) |
+| **Acceptance** | Output attaches to parent Sprout; permissions respected; **no API keys** in any client; non-admin UI does not disclose LLM vendor or model. |
 
 ### Edge cases
 
 - Initiative with **zero** Sprouts yet (planning shell).
 - Sprout in **one primary Plot** but linked to **multiple Initiatives** (allowed with clear UX to avoid clutter).
-- Org **disables AI** or **one provider**; UI adapts.
+- Org **disables AI**; “Elaborate with AI” hidden or disabled for editors. **Misconfigured key** (admin-only error surfaces; ICs see generic failure message).
 - **Deprioritized** Sprouts: excluded from default “current focus” views but searchable and restorable.
 
 ---
@@ -139,13 +140,17 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 | **Planning model** | **Horizons** (daily → yearly) + **priority / lifecycle states** (e.g. Exploring, Committed, Active, Paused, Deprioritized, Done). **Sprints/cycles** are **optional** labels or views—**not** the only way to plan. |
 | **Growth Timeline** | Narrative of progress per Sprout, Plot, Initiative, or Harvest-relevant slice. |
 | **Ownership** | DRI on Sprout, Initiative, and Harvest (as applicable); delegation and teams (enterprise). |
-| **AI-assisted elaboration** | From idea or feature Sprout: generate structured breakdown (tasks/sub-items) using **user-configured** LLM: **OpenAI**, **Anthropic Claude**, **Google Gemini**; org-level allowlist and API key strategy (BYOK vs platform-managed—see FRs). |
-| **Startups** | Low-friction defaults: few Plots, optional Initiatives, AI off until ready. |
-| **Enterprises** | SSO (SAML/OIDC), RBAC, org/workspace boundaries, audit logs, scale targets (NFRs). |
+| **AI-assisted elaboration** | From idea or feature Sprout: generate structured breakdown using an LLM **chosen and credentialed only by workspace admin** (implementation supports **OpenAI**, **Anthropic Claude**, **Google Gemini** behind the scenes). **Non-admin users** have **no visibility** into provider, model, or keys. |
+| **Startups** | Low-friction defaults: few Plots, optional Initiatives, AI off until admin configures. |
+| **Enterprises** | **Custom DB-backed** users, roles, org/workspace boundaries; audit logs where specified (NFRs). **SSO/SAML** is **out of scope for the current phase** (may return on roadmap). |
+| **Email (phase 1)** | **Template authoring** (create/edit) and **preview** (rendered HTML/text with sample or live merge fields). **No requirement** for outbound SMTP send in this phase. |
 | **Integrations (phased)** | At minimum roadmap: GitHub / Jira / Slack **as connectors** for status or link-out (depth phased; not all in v1 engineering). |
 
 ### Out of scope (explicit)
 
+- **Dedicated reporting / BI / analytics** product (dashboards, scheduled exports, cross-workspace rollups). **In-app** lists, filters, Harvest detail, and Initiative views **are** in scope.
+- **Outbound email delivery** (SMTP, SES, etc.) in the **same phase** as template + preview—**planned later** once templates exist.
+- **SSO / SAML / OIDC** for the **current** identity phase (custom DB users only until re-scoped).
 - Replacing full **source control** or **CI/CD** execution inside Sproutly.
 - **Fully automatic** roadmap prioritization without human approval (recommendation UIs may come later; human-in-the-loop for AI breakdown is default).
 - **On-prem** deployment (unless a specific enterprise contract demands it—then treat as program, not default scope).
@@ -153,7 +158,7 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 
 ### Phased delivery note
 
-Engineering may ship **capabilities in waves** (foundation → core objects → Initiatives → AI → enterprise hardening). **Phasing does not reduce the BRD’s target end state** above.
+Engineering may ship **capabilities in waves** (foundation → core objects → Initiatives → AI admin + assist → enterprise hardening without SSO → SMTP). **Phasing does not reduce the BRD’s target end state** above (except items explicitly **out of scope** for the current phase, e.g. SSO, reporting suite, SMTP).
 
 ---
 
@@ -170,7 +175,7 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 **Requirement:** Every Sprout has **exactly one primary Plot** (accountability and default filtering).  
 **Acceptance criteria:**
 
-- Moving primary Plot updates reports and default board membership.
+- Moving primary Plot updates default views and board membership.
 - “Unsorted” or org-wide inbox allowed only if product defines it as a special Plot.
 
 **FR-003 — Initiatives (cross-plot)**  
@@ -215,7 +220,7 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 
 - Harvest detail lists scoped work; Sprout shows **target** and/or **actual** Harvest.
 - Support **multiple Harvests** over time; avoid duplicate “shipped” claims (enforce or warn per product rules).
-- Reporting: “What’s in this release?” exportable or shareable view.
+- Harvest **detail view** lists scoped work (read-only list in product UI; **not** a separate reporting/export module).
 
 **FR-009 — Growth Timeline**  
 **Requirement:** Timeline views for Sprout, Plot, Initiative, and Harvest-scoped work.  
@@ -230,27 +235,31 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 - Guided flows or templates for both; no dead-end for “idea only.”
 
 **FR-011 — AI-assisted task breakdown**  
-**Requirement:** From a Sprout (or defined parent entity), user can request **AI-generated** breakdown into sub-items (tasks/sub-Sprouts or attached checklist—data model TBD in architecture).  
+**Requirement:** From a Sprout (or defined parent entity), a user with appropriate permission can request **AI-generated** breakdown into sub-items (tasks/sub-Sprouts or attached checklist—data model TBD in architecture).  
 **Acceptance criteria:**
 
-- **Provider choice** among **OpenAI**, **Anthropic Claude**, and **Google Gemini** subject to **org configuration** (which providers are enabled).
+- **No end-user or editor UI** to select **OpenAI vs Claude vs Gemini** or to enter API keys; the **active provider and credentials** are **only** those set by **workspace admin** (FR-012).
+- If AI is disabled or misconfigured, editors see **generic** messaging (“AI assist unavailable”); **not** raw provider error strings that identify the vendor.
 - User reviews output before commit; can edit line items; can discard run.
-- **Audit metadata** stored: model, provider, timestamp, user; **no API keys** in client-visible logs.
-- **Rate limits** and **cost visibility** (at least admin-facing) when using platform-managed keys.
+- **Audit metadata** stored server-side: model, provider, timestamp, acting user—**visible only to roles allowed** (e.g. Admin); **no API keys** in logs or API responses.
+- **Rate limits** enforced server-side; **usage/cost indicators** (if any) **admin-only**.
 
-**FR-012 — AI configuration & governance**  
-**Requirement:** Org admins can enable/disable AI, enable/disable per provider, and set **BYOK** (customer API keys) **or** use Sproutly-managed routing (if offered).  
+**FR-012 — AI configuration (admin-only)**  
+**Requirement:** **Only workspace admins** (or a narrower “Settings” role) can: enable/disable AI for the workspace; select **one configured backend** among supported providers (**OpenAI**, **Anthropic Claude**, **Google Gemini**); store and update the **API key** (or equivalent secret) **server-side**.  
 **Acceptance criteria:**
 
-- Disabled provider never called; UI does not offer it.
-- Data processing terms surfaced (what text is sent to LLM) for enterprise review.
+- **Non-admin** users **cannot** access AI settings routes or APIs; UI **never** shows provider name, model, or key to **Editor/Viewer** personas (including error toasts, help text, and “about” copy—use generic “AI assist”).
+- After save, keys are **never** returned in full to the client (masked or omit); rotation supported by replace.
+- Disabled AI: **no** LLM calls; “Elaborate” hidden or disabled for non-admins.
+- Admin-facing short disclosure: **what content** may be sent to the LLM (for policy).
 
-**FR-013 — Authentication & authorization**  
-**Requirement:** Email/password or equivalent baseline; **enterprise: SSO (SAML/OIDC)**.  
+**FR-013 — Authentication & authorization (custom DB users)**  
+**Requirement:** **Users, credentials (hashed), and roles** live in the **application database** (custom user management). Support **sign-up / invite / login / logout** and **role assignment** by admin. **SSO/SAML/OIDC** is **not** in scope for this phase.  
 **Acceptance criteria:**
 
-- Roles at minimum: **Admin**, **Editor**, **Viewer** (expandable: custom roles enterprise).
-- Editors cannot escalate without admin; viewers read-only.
+- Roles at minimum: **Admin**, **Editor**, **Viewer** (expandable later).
+- Editors cannot escalate privileges; viewers read-only.
+- Until **SMTP outbound** exists (future), flows that would normally email users (e.g. invite, password reset) use an **interim** approach documented in implementation (e.g. admin-set password, one-time link shown once in UI, or template **preview-only**)—see FR-017.
 
 **FR-014 — Workspace / org model**  
 **Requirement:** Support **multiple workspaces or orgs** per customer for enterprise; clear boundary of data.  
@@ -270,6 +279,14 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 
 - No lost updates under normal concurrent edits (last-write-wins or merge strategy documented); real-time optional.
 
+**FR-017 — Email templates (authoring & preview)**  
+**Requirement:** Admins (or designated editors) can **create and edit** email **templates** (subject + body with merge fields). Users can **preview** rendered output (sample data or live context as designed).  
+**Acceptance criteria:**
+
+- At least one template type supported end-to-end in UI (e.g. “Invite user” or “Harvest summary”—exact set in UX spec).
+- Preview shows final HTML/text as it **would** send once delivery exists.
+- **Outbound sending** via SMTP (or provider) is **explicitly out of scope** for this FR’s completion—no production mail path required until a later milestone.
+
 ---
 
 ## 7. Non-Functional Requirements
@@ -279,10 +296,10 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 | **NFR-Performance** | Performance | Roadmap and Initiative views **p75 LCP** within agreed SLO; list views paginate; targets scale to **enterprise catalog** (e.g. **10k+** Sprouts per workspace with pagination/filters). |
 | **NFR-Reliability** | Reliability | Hosted SLA tiered by plan; backup/RPO/RTO documented for enterprise. |
 | **NFR-Security** | Security | TLS; **secrets not logged**; encryption at rest for customer data; AI prompts/responses **retention policy** configurable (min: delete-on-request for certain tiers if promised). |
-| **NFR-Privacy-AI** | Privacy (AI) | Clear disclosure of **subprocessors** per provider; option to **restrict** regions/models per org; BYOK keys stored in secure vault. |
+| **NFR-Privacy-AI** | Privacy (AI) | **Admin-facing** disclosure of **subprocessors** / data flow for the **active** provider; **customer API keys** (admin-entered) stored in a **secure vault**, never echoed to non-admin clients. |
 | **NFR-A11y** | Accessibility | **WCAG 2.1 Level AA** for primary workflows. |
 | **NFR-Observability** | Observability | Structured logs, metrics, tracing; correlation IDs. |
-| **NFR-Audit** | Compliance | **Audit log** of security-relevant actions (login, SSO, role change, AI enablement, export) for enterprise tier. |
+| **NFR-Audit** | Compliance | **Audit log** of security-relevant actions (login, role change, AI settings change, user invite) for **admin review in product**—**not** a separate reporting suite. |
 | **NFR-Compliance** | Compliance | GDPR-oriented data handling; enterprise DPA path; SOC2 **roadmap** as GTM requires. |
 
 ---
@@ -296,11 +313,13 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 - **A3:** Clients may **never** use sprints; product must remain usable.
 - **A4:** AI features are **assistive**; humans accept/edit generated work.
 - **A5:** Three LLM families (OpenAI, Anthropic, Google) cover most procurement asks; additional providers later.
+- **A6:** **Only admins** configure which of those backends is active; product copy for ICs stays **vendor-neutral**.
+- **A7:** Identity is **Sproutly-owned** (DB users) until SSO is explicitly added to scope.
 
 ### Constraints
 
 - **C1:** Third-party LLM **availability and pricing** are external; product must **degrade gracefully** if a provider is down.
-- **C2:** Some enterprises will **block** certain providers—**allowlist** is mandatory (FR-012).
+- **C2:** Some enterprises will **block** certain providers—**admin** selects an allowed provider for the workspace; non-admins never see alternatives.
 
 ---
 
@@ -308,9 +327,8 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 
 | Dependency | Type | Owner | Risk if late |
 |------------|------|-------|--------------|
-| LLM APIs (OpenAI, Anthropic, Google) | External | Vendor | Feature flags; per-provider disable |
-| IdP for SSO | External (customer) | Customer IT | Blocks enterprise deal |
-| Email / notifications | Internal or SendGrid-class | Eng | Blocks engagement loops |
+| LLM APIs (OpenAI, Anthropic, Google) | External | Vendor + **admin key** | Admin disables AI or switches provider |
+| SMTP / email provider | External | Eng / Ops | **Deferred** until after FR-017; templates + preview unblock first |
 | Data store + search | Internal | Eng | Scales Initiative/cross filters |
 
 ---
@@ -322,9 +340,10 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 | Risk | L / I | Mitigation | Owner |
 |------|-------|------------|--------|
 | Initiative vs Epic confusion | M / M | Clear definitions in UX copy; training templates | Product |
-| AI quality variance by provider | M / H | User review step; provider selection; eval set | Eng + Product |
-| Enterprise AI data anxiety | H / H | BYOK + disclosure + retention controls | Security + Legal |
+| AI quality variance by provider | M / H | User review step; **admin** can switch provider/key; eval set | Eng + Product |
+| Enterprise AI data anxiety | H / H | **Admin-only** keys + **admin** disclosure + retention controls | Security + Legal |
 | Scope overlap with Jira | M / M | Position as **planning + release narrative**; integrations | GTM |
+| Invite/password flows without SMTP | M / M | Document interim pattern in FR-013; ship FR-017 preview | Eng |
 
 ### Open questions
 
@@ -334,6 +353,7 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 | OQ-2 | **Harvest** ↔ **versioning** (semver) — required fields for enterprise? | Product |
 | OQ-3 | **Initiative** Gantt/timeline vs board-first? | Product + Design |
 | OQ-4 | **Real-time** collab priority tier? | Product |
+| OQ-5 | Which **email templates** are mandatory for v1 (invite vs notifications only)? | Product |
 
 ---
 
@@ -341,16 +361,17 @@ Engineering may ship **capabilities in waves** (foundation → core objects → 
 
 Deliverable milestones (**dependencies**, not calendar promises):
 
-1. **Foundation** — Auth baseline, workspace shell, core UI patterns, observability.
+1. **Foundation** — **DB-backed** auth baseline (FR-013), workspace shell, core UI patterns, observability; **FR-017** template storage + preview when auth flows need it.
 2. **Plots & Sprouts** — FR-001, FR-002, FR-004 (basic), FR-006–FR-007, FR-010.
 3. **Flexible planning** — FR-005, deprioritized/paused flows, optional sprint view.
-4. **Initiatives** — FR-003 end-to-end + cross-Plot reporting and filters.
+4. **Initiatives** — FR-003 end-to-end + cross-Plot filters and Initiative detail (no reporting module).
 5. **Harvests** — FR-008 as **release system of record** + FR-009 alignment.
 6. **AI elaboration** — FR-011, FR-012, NFR-Privacy-AI; ship with **one** provider first if needed, architecture for three.
-7. **Enterprise** — FR-013, FR-014, NFR-Audit, SSO, scale hardening.
+7. **Enterprise hardening (without SSO)** — FR-014, NFR-Audit, scale, security review (**SSO** remains future unless re-scoped).
 8. **Integrations & polish** — FR-015, FR-016 (real-time if prioritized), WCAG hardening.
+9. **Outbound email** — SMTP (or provider) + wire FR-017 templates to actual send (**after** preview ships).
 
-**Depends on:** 2 before 3–4; 4 before deep cross-Plot analytics; 6 independent of 7 for pilot **if** BYOK-only; 7 before broad enterprise GA.
+**Depends on:** 2 before 3–4; 6 after admin settings exist; **SMTP milestone** after FR-017; SSO not a gate for current BRD.
 
 ---
 
@@ -360,3 +381,4 @@ Deliverable milestones (**dependencies**, not calendar promises):
 |------|--------|----------|
 | 2026-03-20 | Initial BRD v1 from README + product-brd-generation skill | All |
 | 2026-03-20 | **v2:** Full product scope — startups + enterprises; **Initiatives** (multi-Plot); flexible non-sprint planning; **Harvest** as release hub; **AI breakdown** (OpenAI / Claude / Gemini); enterprise SSO/RBAC/audit; integrations phased; expanded FRs/NFRs/personas/use cases | All |
+| 2026-03-20 | **v3:** **Admin-only** AI provider + key; **opaque** to other personas; **custom DB users** (SSO out for current phase); **no reporting product**; **email templates + preview**; SMTP later (**FR-017**); NFR-Audit without reporting framing | All |
