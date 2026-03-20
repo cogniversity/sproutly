@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppSession } from "@/lib/auth";
+import { requireActiveWorkspace } from "@/lib/workspace-context";
 import { formatPlanningLine } from "@/lib/timeline";
 import { getWorkspaceStatusSummary } from "@/lib/services/status-summary";
 
@@ -31,18 +30,14 @@ export default async function StatusPage({
 }: {
   searchParams: Promise<{ recent?: string }>;
 }) {
-  const session = await getAppSession();
-  if (!session) redirect("/login");
-  const ws = session.memberships[0]?.workspace;
-  if (!ws) redirect("/login");
-
+  const ctx = await requireActiveWorkspace();
   const sp = await searchParams;
   const recentDays = Math.min(
     90,
     Math.max(1, Number(sp.recent ?? 14) || 14),
   );
 
-  const summary = await getWorkspaceStatusSummary(ws.id, recentDays);
+  const summary = await getWorkspaceStatusSummary(ctx.workspaceId, recentDays);
 
   const list = (items: typeof summary.inProgress) => {
     if (items.length === 0) {
@@ -85,7 +80,7 @@ export default async function StatusPage({
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Leadership status</h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Narrative view across <strong>{ws.name}</strong>. Recently done uses the
+          Narrative view across <strong>{ctx.workspace.name}</strong>. Recently done uses the
           last <strong>{recentDays}</strong> days (
           <Link href="/app/status?recent=7" className="text-emerald-700 underline dark:text-emerald-400">
             7d

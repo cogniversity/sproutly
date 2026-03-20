@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getAppSession } from "@/lib/auth";
+import { requireActiveWorkspace } from "@/lib/workspace-context";
 import { HarvestsBoard } from "@/components/harvests/harvests-board";
 import * as harvests from "@/lib/services/harvests";
 
@@ -9,12 +8,8 @@ export const metadata: Metadata = {
 };
 
 export default async function HarvestsPage() {
-  const session = await getAppSession();
-  if (!session) redirect("/login");
-  const ws = session.memberships[0]?.workspace;
-  if (!ws) redirect("/login");
-
-  const list = await harvests.listHarvests(ws.id);
+  const ctx = await requireActiveWorkspace();
+  const list = await harvests.listHarvests(ctx.workspaceId);
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,7 +19,7 @@ export default async function HarvestsPage() {
           Releases: what ships together.
         </p>
       </div>
-      <HarvestsBoard workspaceId={ws.id} initial={list} />
+      <HarvestsBoard workspaceId={ctx.workspaceId} initial={list} />
     </div>
   );
 }

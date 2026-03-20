@@ -11,6 +11,21 @@ export const loginBodySchema = z.object({
   password: z.string().min(1).max(200),
 });
 
+export const createWorkspaceBodySchema = z.object({
+  name: z.string().min(1).max(120),
+});
+
+export const switchWorkspaceBodySchema = z.object({
+  workspaceId: z.string().min(1).max(40),
+});
+
+const membershipRole = z.enum(["ADMIN", "EDITOR", "VIEWER"]);
+
+export const inviteWorkspaceMemberBodySchema = z.object({
+  email: z.string().email(),
+  role: membershipRole,
+});
+
 export const createPlotBodySchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(4000).optional().nullable(),

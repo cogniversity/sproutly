@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
+  ACTIVE_WORKSPACE_COOKIE,
+  activeWorkspaceCookieOptions,
+} from "@/lib/active-workspace";
+import {
   registerUser,
   SESSION_COOKIE,
   sessionCookieOptions,
@@ -43,6 +47,13 @@ export async function POST(req: Request) {
       { status: 201 },
     );
     res.cookies.set(SESSION_COOKIE, sessionToken, sessionCookieOptions());
+    if (workspace) {
+      res.cookies.set(
+        ACTIVE_WORKSPACE_COOKIE,
+        workspace.id,
+        activeWorkspaceCookieOptions(),
+      );
+    }
     return res;
   } catch {
     return jsonError("Registration failed", 500);

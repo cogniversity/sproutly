@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import {
+  ACTIVE_WORKSPACE_COOKIE,
+  activeWorkspaceCookieOptions,
+} from "@/lib/active-workspace";
+import {
   loginUser,
   SESSION_COOKIE,
   sessionCookieOptions,
@@ -31,5 +35,12 @@ export async function POST(req: Request) {
     workspace,
   });
   res.cookies.set(SESSION_COOKIE, result.sessionToken, sessionCookieOptions());
+  if (workspace) {
+    res.cookies.set(
+      ACTIVE_WORKSPACE_COOKIE,
+      workspace.id,
+      activeWorkspaceCookieOptions(),
+    );
+  }
   return res;
 }
