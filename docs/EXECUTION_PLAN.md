@@ -116,3 +116,4 @@ src/
 |------|--------|
 | 2026-03-20 | Initial plan for MVP slice |
 | 2026-03-20 | **Phases 1–3 implemented** in repo: Prisma+SQLite, auth API + cookie sessions, Plots/Sprouts API, `/app` UI (`/login`, `/register`, `/app/plots`, `/app/plots/[plotId]`) |
+| 2026-03-20 | **Postgres + pending BRD slices:** Initiatives, Harvests, leadership **Status** page, digest **preview** API + Settings UI, **email templates**, **admin AI settings**, OpenAI **elaborate** + sub-sprouts |

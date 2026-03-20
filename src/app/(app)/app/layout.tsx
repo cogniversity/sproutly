@@ -26,7 +26,7 @@ export default async function AppShellLayout({
             >
               Sproutly
             </Link>
-            <nav className="flex gap-4 text-sm">
+            <nav className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
               <Link
                 href="/app"
                 className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
@@ -38,6 +38,30 @@ export default async function AppShellLayout({
                 className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
               >
                 Plots
+              </Link>
+              <Link
+                href="/app/initiatives"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                Initiatives
+              </Link>
+              <Link
+                href="/app/harvests"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                Harvests
+              </Link>
+              <Link
+                href="/app/status"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                Status
+              </Link>
+              <Link
+                href="/app/settings"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                Settings
               </Link>
             </nav>
           </div>

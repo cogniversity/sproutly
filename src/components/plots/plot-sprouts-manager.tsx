@@ -29,6 +29,11 @@ export function PlotSproutsManager({
   const router = useRouter();
   const [sprouts, setSprouts] = useState(initialSprouts);
   const [title, setTitle] = useState("");
+  const [aiPreview, setAiPreview] = useState<{
+    sproutId: string;
+    suggestions: { title: string; description?: string }[];
+  } | null>(null);
+  const [aiBusy, setAiBusy] = useState<string | null>(null);
 
   async function createSprout(e: React.FormEvent) {
     e.preventDefault();
@@ -65,6 +70,38 @@ export function PlotSproutsManager({
     router.refresh();
   }
 
+  async function elaborate(sproutId: string, create: boolean) {
+    setAiBusy(sproutId);
+    setAiPreview(null);
+    try {
+      const res = await fetch(`/api/sprouts/${sproutId}/elaborate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ create }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        suggestions?: { title: string; description?: string }[];
+        created?: SproutRow[];
+        error?: string;
+      };
+      if (!res.ok) {
+        alert(data.error ?? "AI assist unavailable.");
+        return;
+      }
+      if (create && data.created?.length) {
+        setSprouts((prev) => [...data.created!, ...prev]);
+        setAiPreview(null);
+        router.refresh();
+        return;
+      }
+      if (data.suggestions?.length) {
+        setAiPreview({ sproutId, suggestions: data.suggestions });
+      }
+    } finally {
+      setAiBusy(null);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <form onSubmit={createSprout} className="flex flex-wrap items-end gap-3">
@@ -96,13 +133,14 @@ export function PlotSproutsManager({
               <th className="px-3 py-2 font-medium">Status</th>
               <th className="px-3 py-2 font-medium">Horizon</th>
               <th className="px-3 py-2 font-medium">Owner</th>
+              <th className="px-3 py-2 font-medium">AI</th>
               <th className="px-3 py-2 font-medium" />
             </tr>
           </thead>
           <tbody>
             {sprouts.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-3 py-6 text-zinc-500">
+                <td colSpan={6} className="px-3 py-6 text-zinc-500">
                   No Sprouts in this plot yet.
                 </td>
               </tr>
@@ -112,7 +150,12 @@ export function PlotSproutsManager({
                   key={s.id}
                   className="border-b border-zinc-100 dark:border-zinc-800"
                 >
-                  <td className="px-3 py-2 font-medium">{s.title}</td>
+                  <td className="px-3 py-2 font-medium">
+                    {s.parentSproutId ? (
+                      <span className="text-zinc-400">↳ </span>
+                    ) : null}
+                    {s.title}
+                  </td>
                   <td className="px-3 py-2">
                     <select
                       value={s.status}
@@ -150,6 +193,28 @@ export function PlotSproutsManager({
                   <td className="px-3 py-2 text-zinc-600 dark:text-zinc-400">
                     {s.owner?.name ?? "—"}
                   </td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        disabled={aiBusy === s.id}
+                        onClick={() => void elaborate(s.id, false)}
+                        className="text-left text-xs text-emerald-700 underline disabled:opacity-50 dark:text-emerald-400"
+                      >
+                        {aiBusy === s.id ? "…" : "Suggest tasks"}
+                      </button>
+                      {aiPreview?.sproutId === s.id ? (
+                        <button
+                          type="button"
+                          disabled={aiBusy === s.id}
+                          onClick={() => void elaborate(s.id, true)}
+                          className="text-left text-xs font-medium text-emerald-800 dark:text-emerald-300"
+                        >
+                          Create as sub-sprouts
+                        </button>
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-3 py-2 text-right">
                     <button
                       type="button"
@@ -165,6 +230,26 @@ export function PlotSproutsManager({
           </tbody>
         </table>
       </div>
+
+      {aiPreview ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950/30">
+          <p className="font-medium text-emerald-900 dark:text-emerald-200">
+            Suggested breakdown
+          </p>
+          <ol className="mt-2 list-decimal space-y-1 pl-5">
+            {aiPreview.suggestions.map((x, i) => (
+              <li key={i}>
+                {x.title}
+                {x.description ? (
+                  <span className="block text-xs text-zinc-600 dark:text-zinc-400">
+                    {x.description}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
     </div>
   );
 }

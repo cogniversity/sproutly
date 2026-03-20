@@ -114,10 +114,11 @@ See [`skills/README.md`](skills/README.md) for the skill order.
 
 * **Framework:** [Next.js](https://nextjs.org/) 16 (App Router), React 19, TypeScript  
 * **Styling:** [Tailwind CSS](https://tailwindcss.com/) 4  
+* **Data:** [Prisma](https://www.prisma.io/) ORM + **PostgreSQL 17+** (`DATABASE_URL`; cloud agents may expose `PG_CONNECTION_STRING`)  
 * **Linting:** ESLint (flat config: `eslint.config.mjs`)  
 * **Paths:** `@/*` → `./src/*` (see `tsconfig.json`)
 
-See [`AGENTS.md`](AGENTS.md) for dev commands and Cursor/cloud notes. Persistence, auth implementation, and other backend choices will evolve with the product—refer to the BRD and upcoming architecture docs.
+See [`AGENTS.md`](AGENTS.md) for dev commands and Cursor/cloud notes. Refer to the BRD and [`docs/SYSTEM_ARCHITECTURE.md`](docs/SYSTEM_ARCHITECTURE.md) for API shape.
 
 ---
 

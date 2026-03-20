@@ -51,6 +51,7 @@ export async function POST(
 
   const sprout = await sprouts.createSprout({
     plotId,
+    parentSproutId: parsed.data.parentSproutId,
     title: parsed.data.title,
     description: parsed.data.description,
     status: parsed.data.status,

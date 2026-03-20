@@ -11,6 +11,7 @@ export async function listSprouts(plotId: string) {
 
 export async function createSprout(input: {
   plotId: string;
+  parentSproutId?: string | null;
   title: string;
   description?: string | null;
   status?: SproutStatus;
@@ -20,6 +21,7 @@ export async function createSprout(input: {
   return prisma.sprout.create({
     data: {
       plotId: input.plotId,
+      parentSproutId: input.parentSproutId ?? null,
       title: input.title,
       description: input.description ?? null,
       status: input.status ?? "BACKLOG",
@@ -28,6 +30,28 @@ export async function createSprout(input: {
     },
     include: { owner: { select: { id: true, name: true, email: true } } },
   });
+}
+
+export async function createChildSprouts(
+  parentSproutId: string,
+  plotId: string,
+  suggestions: { title: string; description?: string }[],
+) {
+  return prisma.$transaction(
+    suggestions.map((s) =>
+      prisma.sprout.create({
+        data: {
+          plotId,
+          parentSproutId,
+          title: s.title.slice(0, 300),
+          description: s.description?.slice(0, 8000) ?? null,
+          status: "BACKLOG",
+          horizon: "NONE",
+        },
+        include: { owner: { select: { id: true, name: true, email: true } } },
+      }),
+    ),
+  );
 }
 
 export async function getSproutById(sproutId: string) {

@@ -9,7 +9,8 @@
 
 - **PK:** `cuid()` via Prisma (URL-safe; fine for MVP).  
 - **Timestamps:** `createdAt`, `updatedAt` on mutable entities.  
-- **Table names:** Prisma default mapping (`User` → `User` table in SQLite; pluralization off — use `@@map` if Postgres style desired later).
+- **DB engine:** **PostgreSQL** (17+ in cloud). Prisma `datasource` uses `DATABASE_URL`.  
+- **Table names:** Prisma default quoted identifiers (`"User"`, etc.).
 
 ---
 
@@ -31,7 +32,7 @@
 | Column | Type | Notes |
 |--------|------|-------|
 | id | cuid PK | |
-| token | string UNIQUE | opaque bearer equals cookie value |
+| tokenHash | string UNIQUE | SHA-256 of opaque session cookie value |
 | userId | FK → User | onDelete Cascade |
 | expiresAt | datetime | |
 | createdAt | datetime | |
@@ -91,10 +92,27 @@
 
 ---
 
-## Junction tables (later)
+### `Sprout` (additions)
 
-- `Initiative`, `InitiativePlot`, `InitiativeSprout`  
-- `Harvest`, `HarvestSprout`
+| Column | Type | Notes |
+|--------|------|-------|
+| parentSproutId | FK → Sprout? | optional sub-sprouts from AI elaboration |
+
+### `Initiative`, `InitiativePlot`, `InitiativeSprout`
+
+Cross-plot programs; M2M to `Plot` and `Sprout`. Optional `driUserId` → `User`.
+
+### `Harvest`, `HarvestSprout`
+
+Release container; M2M to `Sprout`.
+
+### `WorkspaceAiSettings`
+
+One row per workspace (`workspaceId` unique): `enabled`, `provider` (enum), `apiKey` (server-only).
+
+### `EmailTemplate`
+
+Per workspace: `kind` (INVITE | DIGEST | GENERIC), `subject`, `bodyHtml` (merge fields e.g. `{{workspaceName}}`, `{{digestHtml}}`).
 
 ---
 
@@ -109,3 +127,4 @@ Implemented in `prisma/schema.prisma` (source of truth after generation).
 | Date | Change |
 |------|--------|
 | 2026-03-20 | MVP tables for auth + plots + sprouts |
+| 2026-03-20 | **PostgreSQL** datasource; Initiatives, Harvests, `WorkspaceAiSettings`, `EmailTemplate`; Sprout `parentSproutId`; session **tokenHash** |

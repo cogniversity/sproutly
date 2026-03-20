@@ -13,7 +13,7 @@ A modern product management platform built with Next.js (React, TypeScript, Tail
 ### Common commands
 
 - **Install deps:** `npm install`
-- **Database:** Copy `.env.example` → `.env`; default is SQLite at `prisma/dev.db`. Apply migrations: `npx prisma migrate dev` (or `npm run db:migrate`).
+- **Database:** Set `DATABASE_URL` to your **PostgreSQL 17+** connection string (e.g. Neon). In Cursor Cloud, `PG_CONNECTION_STRING` may be injected — use `DATABASE_URL="${PG_CONNECTION_STRING}"` in `.env` if needed. Apply migrations: `DATABASE_URL=... npx prisma migrate deploy` (CI/prod) or `npx prisma migrate dev` (local).
 - **Dev server:** `npm run dev` (starts on http://localhost:3000)
 - **Lint:** `npm run lint` (ESLint with Next.js + TypeScript config)
 - **Build:** `npm run build` (runs `prisma generate` then `next build`)

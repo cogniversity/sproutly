@@ -36,18 +36,33 @@ export default async function AppHomePage() {
         </Link>
         <div className="rounded-xl border border-dashed border-zinc-300 p-5 dark:border-zinc-700">
           <h2 className="font-medium text-zinc-700 dark:text-zinc-300">
-            Coming next
+            Also in the app
           </h2>
-          <p className="mt-2 text-sm text-zinc-500">
-            Initiatives, Harvests, leadership status, and AI-assisted breakdown—see{" "}
-            <Link
-              href="https://github.com/cogniversity/sproutly/blob/main/docs/BUSINESS_REQUIREMENTS_DOCUMENT.md"
-              className="text-emerald-700 underline dark:text-emerald-400"
-            >
-              BRD
-            </Link>
-            .
-          </p>
+          <ul className="mt-2 list-inside list-disc text-sm text-zinc-500">
+            <li>
+              <Link href="/app/initiatives" className="text-emerald-700 underline dark:text-emerald-400">
+                Initiatives
+              </Link>{" "}
+              (cross-plot)
+            </li>
+            <li>
+              <Link href="/app/harvests" className="text-emerald-700 underline dark:text-emerald-400">
+                Harvests
+              </Link>{" "}
+              (releases)
+            </li>
+            <li>
+              <Link href="/app/status" className="text-emerald-700 underline dark:text-emerald-400">
+                Leadership status
+              </Link>
+            </li>
+            <li>
+              <Link href="/app/settings" className="text-emerald-700 underline dark:text-emerald-400">
+                Settings
+              </Link>{" "}
+              — AI (admin), email templates, digest preview
+            </li>
+          </ul>
         </div>
       </div>
     </div>
