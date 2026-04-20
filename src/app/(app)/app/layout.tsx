@@ -30,7 +30,7 @@ export default async function AppShellLayout({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-6">
             <Link
               href="/app"
@@ -100,7 +100,7 @@ export default async function AppShellLayout({
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">{children}</main>
     </div>
   );
 }

@@ -43,3 +43,15 @@ export function formatPlanningLine(
   if (b !== "unset") parts.push(`~${b}`);
   return parts.length ? parts.join(" · ") : "—";
 }
+
+export function quarterLabelFromDate(
+  value: Date | string | null | undefined,
+): string {
+  if (!value) return "";
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return "";
+
+  const quarter = Math.floor(date.getMonth() / 3) + 1;
+  const shortYear = String(date.getFullYear()).slice(-2);
+  return `Q${quarter}'${shortYear}`;
+}

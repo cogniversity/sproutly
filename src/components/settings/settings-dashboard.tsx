@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { ConfirmActionButton } from "@/components/ui/confirm-action-button";
 
 type Tab = "ai" | "templates" | "digest";
 
@@ -243,7 +244,6 @@ function TemplatesPanel({
   }
 
   async function remove(id: string) {
-    if (!confirm("Delete template?")) return;
     await fetch(`/api/email-templates/${id}`, { method: "DELETE" });
     await refresh();
     router.refresh();
@@ -260,13 +260,14 @@ function TemplatesPanel({
             <span>
               {t.name} <span className="text-zinc-400">({t.kind})</span>
             </span>
-            <button
-              type="button"
-              onClick={() => void remove(t.id)}
+            <ConfirmActionButton
+              buttonLabel="Delete"
+              title="Delete template?"
+              message={`Delete the "${t.name}" template?`}
+              confirmLabel="Delete template"
+              onConfirm={() => remove(t.id)}
               className="text-xs text-red-600"
-            >
-              Delete
-            </button>
+            />
           </li>
         ))}
       </ul>

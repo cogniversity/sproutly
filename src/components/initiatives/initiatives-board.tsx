@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AiSuggestButton } from "@/components/ai/ai-suggest-button";
+import { quarterLabelFromDate } from "@/lib/timeline";
 
 type InitiativeRow = {
   id: string;
@@ -67,11 +68,20 @@ export function InitiativesBoard({
             description={description}
             onResult={(d) => {
               if (typeof d.description === "string") setDescription(d.description);
-              if (typeof d.timelineLabel === "string") setTimelineLabel(d.timelineLabel);
               if (d.targetCompletionAt === null || typeof d.targetCompletionAt === "string") {
+                const nextDate = d.targetCompletionAt
+                  ? String(d.targetCompletionAt).slice(0, 10)
+                  : "";
                 setTargetCompletionAt(
-                  d.targetCompletionAt ? String(d.targetCompletionAt).slice(0, 10) : "",
+                  nextDate,
                 );
+                if (nextDate) {
+                  setTimelineLabel(quarterLabelFromDate(nextDate));
+                } else if (typeof d.timelineLabel === "string") {
+                  setTimelineLabel(d.timelineLabel);
+                }
+              } else if (typeof d.timelineLabel === "string") {
+                setTimelineLabel(d.timelineLabel);
               }
             }}
           />
@@ -100,7 +110,12 @@ export function InitiativesBoard({
           <input
             type="date"
             value={targetCompletionAt}
-            onChange={(e) => setTargetCompletionAt(e.target.value)}
+            onChange={(e) => {
+              const nextDate = e.target.value;
+              setTargetCompletionAt(nextDate);
+              const quarterLabel = quarterLabelFromDate(nextDate);
+              if (quarterLabel) setTimelineLabel(quarterLabel);
+            }}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
           />
         </div>

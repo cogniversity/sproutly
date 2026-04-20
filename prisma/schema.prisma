@@ -22,6 +22,14 @@ enum SproutStatus {
   DONE
 }
 
+enum SproutType {
+  IDEA
+  FEATURE
+  BUG
+  DEBT
+  TASK
+}
+
 enum LlmProvider {
   OPENAI
   ANTHROPIC
@@ -44,6 +52,7 @@ model User {
   sessions     Session[]
   memberships  Membership[]
   ownedSprouts Sprout[]     @relation("SproutOwner")
+  sproutComments SproutComment[]
   initiativesAsDri Initiative[] @relation("InitiativeDri")
 }
 
@@ -109,6 +118,7 @@ model Sprout {
   children            Sprout[]     @relation("SproutTree")
   title               String
   description         String?
+  type                SproutType   @default(IDEA)
   status              SproutStatus @default(BACKLOG)
   timelineLabel       String?
   targetCompletionAt  DateTime?
@@ -116,6 +126,7 @@ model Sprout {
   owner               User?        @relation("SproutOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
+  comments            SproutComment[]
   initiativeSprouts   InitiativeSprout[]
   harvestSprouts      HarvestSprout[]
 
@@ -123,6 +134,20 @@ model Sprout {
   @@index([ownerUserId])
   @@index([parentSproutId])
   @@index([targetCompletionAt])
+}
+
+model SproutComment {
+  id           String   @id @default(cuid())
+  sproutId     String
+  sprout       Sprout   @relation(fields: [sproutId], references: [id], onDelete: Cascade)
+  authorUserId String
+  author       User     @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  body         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([sproutId, createdAt])
+  @@index([authorUserId])
 }
 
 model Initiative {

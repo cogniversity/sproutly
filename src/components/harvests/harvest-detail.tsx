@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { InlineNotice } from "@/components/ui/inline-notice";
 
 type HarvestDetail = {
   id: string;
@@ -14,33 +15,42 @@ type HarvestDetail = {
 export function HarvestDetailClient({ harvest }: { harvest: HarvestDetail }) {
   const router = useRouter();
   const [sproutId, setSproutId] = useState("");
+  const [notice, setNotice] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
     if (!sproutId.trim()) return;
+    setNotice(null);
     const res = await fetch(`/api/harvests/${harvest.id}/sprouts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sproutId: sproutId.trim() }),
     });
     if (!res.ok) {
-      alert("Could not link sprout.");
+      setNotice({ tone: "error", message: "Could not link sprout." });
       return;
     }
     setSproutId("");
+    setNotice({ tone: "success", message: "Sprout added to harvest." });
     router.refresh();
   }
 
   async function remove(sid: string) {
+    setNotice(null);
     await fetch(
       `/api/harvests/${harvest.id}/sprouts?sproutId=${encodeURIComponent(sid)}`,
       { method: "DELETE" },
     );
+    setNotice({ tone: "success", message: "Sprout removed from harvest." });
     router.refresh();
   }
 
   return (
     <div className="flex flex-col gap-4">
+      {notice ? <InlineNotice message={notice.message} tone={notice.tone} /> : null}
       <h2 className="text-sm font-semibold text-zinc-500">Sprouts in this release</h2>
       <ul className="space-y-2 text-sm">
         {harvest.sprouts.map((s) => (

@@ -56,6 +56,7 @@ export async function POST(
     parentSproutId: rest.parentSproutId,
     title: rest.title,
     description: rest.description,
+    type: rest.type,
     status: rest.status,
     timelineLabel: rest.timelineLabel,
     targetCompletionAt: optDate(targetCompletionAt ?? undefined),

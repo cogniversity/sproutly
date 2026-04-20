@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { InlineNotice } from "@/components/ui/inline-notice";
 
 type Entity = "plot" | "sprout" | "initiative";
 
@@ -22,12 +23,14 @@ export function AiSuggestButton({
   label?: string;
 }) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   async function run() {
     if (!title.trim()) {
-      alert("Add a title first so AI has context.");
+      setError("Add a title first so AI has context.");
       return;
     }
+    setError("");
     setBusy(true);
     try {
       const res = await fetch(`/api/workspaces/${workspaceId}/ai/enrich`, {
@@ -45,11 +48,12 @@ export function AiSuggestButton({
         hint?: string;
       } & Record<string, unknown>;
       if (!res.ok) {
-        alert(data.error ?? "AI unavailable.");
+        setError([data.error, data.hint].filter(Boolean).join(" ") || "AI unavailable.");
         return;
       }
       delete data.error;
       delete data.hint;
+      setError("");
       onResult(data);
     } finally {
       setBusy(false);
@@ -57,13 +61,16 @@ export function AiSuggestButton({
   }
 
   return (
-    <button
-      type="button"
-      disabled={busy}
-      onClick={() => void run()}
-      className="rounded-lg border border-emerald-600/40 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
-    >
-      {busy ? "…" : label}
-    </button>
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void run()}
+        className="rounded-lg border border-emerald-600/40 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
+      >
+        {busy ? "…" : label}
+      </button>
+      {error ? <InlineNotice message={error} tone="error" /> : null}
+    </div>
   );
 }

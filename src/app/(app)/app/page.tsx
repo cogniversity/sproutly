@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AiHomeComposer } from "@/components/home/ai-home-composer";
 import { requireActiveWorkspace } from "@/lib/workspace-context";
 import { listPlots } from "@/lib/services/plots";
 
@@ -64,6 +65,7 @@ export default async function AppHomePage() {
           </ul>
         </div>
       </div>
+      <AiHomeComposer workspaceId={ctx.workspaceId} />
     </div>
   );
 }

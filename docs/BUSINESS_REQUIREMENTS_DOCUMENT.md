@@ -154,7 +154,7 @@ Provide **one system of record** where teams can: organize work by **Plot** (pro
 | Area | Description |
 |------|-------------|
 | **Plots** | Products, teams, or streams—organizational “where work lives.” |
-| **Sprouts** | Ideas, initiatives, features, tasks—**primary Plot** for home accountability. |
+| **Sprouts** | Ideas, features, bugs, technical work, and tasks—**primary Plot** for home accountability. |
 | **Initiatives** | **First-class cross-plot programs** (customer events, migrations, company-wide themes). Link **≥ 1 Plot** (typically ≥ 2 for the intended use case); link many Sprouts; optional DRI, dates, narrative. |
 | **Harvests** | **Release tracking**: named release, target/shipped dates, scope = set of Sprouts (and/or explicit version metadata). Support **multiple concurrent release lines** per org if needed (e.g. product A vs B). |
 | **Planning model** | **Horizons** (daily → yearly) + **priority / lifecycle states** (e.g. Exploring, Committed, Active, Paused, Deprioritized, Done). **Sprints/cycles** are **optional** labels or views—**not** the only way to plan. |

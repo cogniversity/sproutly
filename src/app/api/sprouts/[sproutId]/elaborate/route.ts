@@ -34,6 +34,15 @@ export async function POST(
   const parsed = elaborateSproutBodySchema.safeParse(body);
   if (!parsed.success) return jsonError("Invalid request", 400);
 
+  if (parsed.data.create && parsed.data.selectedSuggestions?.length) {
+    const created = await sprouts.createChildSprouts(
+      sproutId,
+      sprout.plotId,
+      parsed.data.selectedSuggestions,
+    );
+    return Response.json({ created });
+  }
+
   const creds = await resolveLlmApiKey(wsId);
   if (!creds) {
     return Response.json(

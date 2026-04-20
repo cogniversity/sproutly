@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SPROUT_TYPES } from "@/lib/sprout-types";
 
 export const registerBodySchema = z.object({
   email: z.string().email(),
@@ -48,9 +49,17 @@ const sproutStatus = z.enum([
   "DONE",
 ]);
 
+const sproutType = z.enum(SPROUT_TYPES);
+
+const aiSuggestedSproutSchema = z.object({
+  title: z.string().min(1).max(300),
+  description: z.string().max(8000).optional(),
+});
+
 export const createSproutBodySchema = z.object({
   title: z.string().min(1).max(300),
   description: z.string().max(8000).optional().nullable(),
+  type: sproutType.optional(),
   status: sproutStatus.optional(),
   timelineLabel: z.string().max(80).optional().nullable(),
   targetCompletionAt: z.string().max(40).optional().nullable(),
@@ -61,10 +70,19 @@ export const createSproutBodySchema = z.object({
 export const patchSproutBodySchema = z.object({
   title: z.string().min(1).max(300).optional(),
   description: z.string().max(8000).optional().nullable(),
+  type: sproutType.optional(),
   status: sproutStatus.optional(),
   timelineLabel: z.string().max(80).optional().nullable(),
   targetCompletionAt: z.string().max(40).optional().nullable(),
   ownerUserId: z.string().min(1).max(40).optional().nullable(),
+});
+
+export const createSproutCommentBodySchema = z.object({
+  body: z.string().trim().min(1).max(8000),
+});
+
+export const patchSproutCommentBodySchema = z.object({
+  body: z.string().trim().min(1).max(8000),
 });
 
 const llmProvider = z.enum(["OPENAI", "ANTHROPIC", "GOOGLE"]);
@@ -77,6 +95,7 @@ export const patchAiSettingsSchema = z.object({
 
 export const elaborateSproutBodySchema = z.object({
   create: z.boolean().optional(),
+  selectedSuggestions: z.array(aiSuggestedSproutSchema).min(1).optional(),
 });
 
 export const createInitiativeBodySchema = z.object({

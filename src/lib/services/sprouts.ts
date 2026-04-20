@@ -1,11 +1,23 @@
-import type { SproutStatus } from "@prisma/client";
+import type { SproutStatus, SproutType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+
+function sproutInclude() {
+  return {
+    owner: { select: { id: true, name: true, email: true } },
+    comments: {
+      orderBy: [{ createdAt: "asc" as const }],
+      include: {
+        author: { select: { id: true, name: true, email: true } },
+      },
+    },
+  };
+}
 
 export async function listSprouts(plotId: string) {
   return prisma.sprout.findMany({
     where: { plotId },
     orderBy: [{ updatedAt: "desc" }],
-    include: { owner: { select: { id: true, name: true, email: true } } },
+    include: sproutInclude(),
   });
 }
 
@@ -14,6 +26,7 @@ export async function createSprout(input: {
   parentSproutId?: string | null;
   title: string;
   description?: string | null;
+  type?: SproutType;
   status?: SproutStatus;
   timelineLabel?: string | null;
   targetCompletionAt?: Date | null;
@@ -25,19 +38,20 @@ export async function createSprout(input: {
       parentSproutId: input.parentSproutId ?? null,
       title: input.title,
       description: input.description ?? null,
+      type: input.type ?? "IDEA",
       status: input.status ?? "BACKLOG",
       timelineLabel: input.timelineLabel ?? null,
       targetCompletionAt: input.targetCompletionAt ?? null,
       ownerUserId: input.ownerUserId ?? null,
     },
-    include: { owner: { select: { id: true, name: true, email: true } } },
+    include: sproutInclude(),
   });
 }
 
 export async function createChildSprouts(
   parentSproutId: string,
   plotId: string,
-  suggestions: { title: string; description?: string }[],
+  suggestions: { title: string; description?: string; type?: SproutType }[],
 ) {
   return prisma.$transaction(
     suggestions.map((s) =>
@@ -47,9 +61,10 @@ export async function createChildSprouts(
           parentSproutId,
           title: s.title.slice(0, 300),
           description: s.description?.slice(0, 8000) ?? null,
+          type: s.type ?? "TASK",
           status: "BACKLOG",
         },
-        include: { owner: { select: { id: true, name: true, email: true } } },
+        include: sproutInclude(),
       }),
     ),
   );
@@ -60,7 +75,7 @@ export async function getSproutById(sproutId: string) {
     where: { id: sproutId },
     include: {
       plot: { include: { workspace: true } },
-      owner: { select: { id: true, name: true, email: true } },
+      ...sproutInclude(),
     },
   });
 }
@@ -70,6 +85,7 @@ export async function updateSprout(
   data: {
     title?: string;
     description?: string | null;
+    type?: SproutType;
     status?: SproutStatus;
     timelineLabel?: string | null;
     targetCompletionAt?: Date | null;
@@ -79,7 +95,7 @@ export async function updateSprout(
   return prisma.sprout.update({
     where: { id: sproutId },
     data,
-    include: { owner: { select: { id: true, name: true, email: true } } },
+    include: sproutInclude(),
   });
 }
 
